@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
+
+namespace Interlook.Eventing
+{
+	/// <summary>
+	/// Default implementation of the <see cref="IEventBus"/> and <see cref="IEventBusEx"/> interfaces.
+	/// </summary>
+	public class EventBus : IEventBusEx
+	{
+		private Dictionary<IUnsubscribeToken, IEventSubscription> subscriptions = new Dictionary<IUnsubscribeToken, IEventSubscription>();
+
+		public virtual void Publish<TEvent>(TEvent ev) where TEvent : IEvent
+		{
+			var currentSubscriptions = subscriptions.ToList();
+
+			var handlersForThisRun = currentSubscriptions
+				.Where(p => p.Value.CanHandle(ev))
+				.ToList();
+
+			foreach (var z in handlersForThisRun)
+			{
+				z.Value.Handle(ev);
+			}
+		}
+
+		public virtual IUnsubscribeToken Subscribe<TEvent>(Action<TEvent> eventHandlerCallback) where TEvent : IEvent
+		{
+			return Subscribe<TEvent>(eventHandlerCallback, false);
+		}
+
+		public virtual IUnsubscribeToken Subscribe<TEvent>(Action<TEvent> eventHandlerCallback, Func<TEvent, bool> filterPredicate) where TEvent : IEvent
+		{
+			return Subscribe<TEvent>(eventHandlerCallback, filterPredicate, false);
+		}
+
+		public virtual IUnsubscribeToken RegisterHandlerFor<TEvent>(IEventHandlerFor<TEvent> handler) where TEvent : IEvent
+		{
+			return RegisterHandlerFor<TEvent>(handler, false);
+		}
+
+		public virtual void Unsubscribe<TEvent>(Action<TEvent> eventHandlerCallback) where TEvent : IEvent
+		{
+			var found = this.subscriptions
+				.Where(p => p.Value is EventSubscription<TEvent>)
+				.Where(p => ((EventSubscription<TEvent>)p.Value).ActionDelegate == eventHandlerCallback);
+
+			if (found.Any())
+			{
+				this.subscriptions.Remove(found.First().Key);
+			}
+		}
+
+		public virtual void Unsubscribe(IUnsubscribeToken token)
+		{
+			this.subscriptions.Remove(token);
+		}
+
+		public virtual void UnregisterHandlerFor<TEvent>(IEventHandlerFor<TEvent> handler) where TEvent : IEvent
+		{
+			var found = this.subscriptions
+				.Where(p => p.Value is EventHandlerSubscription<TEvent>)
+				.Where(p => ((EventHandlerSubscription<TEvent>)p.Value).GetHandler() == handler);
+
+			if (found.Any())
+			{
+				this.subscriptions.Remove(found.First().Key);
+			}
+		}
+
+		public virtual IUnsubscribeToken Subscribe<TEvent>(Action<TEvent> eventHandlerCallback, bool useWeakReference) where TEvent : IEvent
+		{
+			var subscription = new EventSubscription<TEvent>(eventHandlerCallback, useWeakReference, this.Unsubscribe);
+			subscriptions.Add(subscription.UnsubscribeToken, subscription);
+			return subscription.UnsubscribeToken;
+		}
+
+		public virtual IUnsubscribeToken Subscribe<TEvent>(Action<TEvent> eventHandlerCallback, Func<TEvent, bool> filterPredicate, bool useWeakReferences) where TEvent : IEvent
+		{
+			var subscription = new EventSubscription<TEvent>(eventHandlerCallback, filterPredicate, useWeakReferences, this.Unsubscribe);
+			subscriptions.Add(subscription.UnsubscribeToken, subscription);
+			return subscription.UnsubscribeToken;
+		}
+
+		public virtual IUnsubscribeToken RegisterHandlerFor<TEvent>(IEventHandlerFor<TEvent> handler, bool useWeakReference) where TEvent : IEvent
+		{
+			var subscription = new EventHandlerSubscription<TEvent>(handler, useWeakReference, this.Unsubscribe);
+			subscriptions.Add(subscription.UnsubscribeToken, subscription);
+			return subscription.UnsubscribeToken;
+		}
+	}
+}
