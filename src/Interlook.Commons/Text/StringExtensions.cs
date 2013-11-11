@@ -267,6 +267,23 @@ namespace Interlook.Text
 			var shaM = new SHA512Managed();
 			return ComputeHashString(stringToHash, encoding, shaM, salt);
 		}
+		
+		/// <summary>
+		/// Matches a string against a pattern as the LIKE operator in SQL does.
+		/// </summary>
+		/// <param name="stringToMatch">The string to match.</param>
+		/// <param name="pattern">Matching pattern, according to SQL's LIKE operator.</param>
+		/// <returns><c>true</c>, if the string meets the given matching pattern.</returns>
+		public static bool IsLike(this string stringToMatch, string pattern)
+		{
+			if (String.IsNullOrEmpty(stringToMatch))
+			{
+				return false;
+			}
+
+			// TODO: calculate LIKE
+			return false;
+		}
 
 		/// <summary>
 		/// Returns a normalized copy of a string, meaning only capitals without any accent signs (e.g. accent circumflex).

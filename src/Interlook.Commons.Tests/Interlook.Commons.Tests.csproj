@@ -65,6 +65,7 @@
     <Compile Include="Components\MethodResultTestObject.cs" />
     <Compile Include="Components\MethodResultTests.cs" />
     <Compile Include="Components\GenericMethodResultTests.cs" />
+    <Compile Include="Components\MaybeTests.cs" />
     <Compile Include="Eventing\ExtendedSourceAndPublishingTests.cs" />
     <Compile Include="Eventing\SourceAndPublishingTests.cs" />
     <Compile Include="Eventing\TestEvent.cs" />
