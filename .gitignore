@@ -36,6 +36,11 @@ x64/
 *.vspscc
 *.vssscc
 .builds
+/bin/*
+lib/*/*
+!lib/repositories.config
+!lib/.gitignore
+/.nuget/*
 
 # Visual C++ cache files
 ipch/
@@ -98,7 +103,11 @@ TestResults
 ClientBin
 [Ss]tyle[Cc]op.*
 ~$*
+*.nuspec
 *.dbmdl
+*.cmd
+*.licenseheader
+
 Generated_Code #added for RIA/Silverlight projects
 
 # Backup & report files from converting an old project file to a newer

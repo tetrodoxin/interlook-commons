@@ -23,24 +23,22 @@
 //SOFTWARE.
 
 #endregion 
-using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace Interlook.Eventing
-{
-	/// <summary>
-	/// Interface, that provides methods for buffering events to finally commit or discard them. Makes it thus possible,
-	/// to collect a bunch of events first an publish them later as a one-block.
-	/// </summary>
-	public interface IEventPublisherTransaction : IEventBus, IDisposable
-	{
-		/// <summary>
-		/// Publishes all events, that has been published into buffer so far.
-		/// </summary>
-		void PublishAllEvents();
+[assembly: AssemblyTitle("Interlook.Commons")]
+[assembly: AssemblyDescription("Another library of daily basis tools, one could wish to be included in .NET")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Andreas Hübner")]
+[assembly: AssemblyProduct("Interlook.Commons")]
+[assembly: AssemblyCopyright("")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
 
-		/// <summary>
-		/// Discards all bufferend events.
-		/// </summary>
-		void DiscardAllEvents();
-	}
-}
+[assembly: ComVisible(false)]
+
+[assembly: Guid("2209a1e4-f9e4-42f7-9c17-6ad1cd427831")]
+
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyInformationalVersion("1.0.1.0")]

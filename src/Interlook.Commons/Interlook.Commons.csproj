@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{56BE02E9-760E-42BA-8C9E-F0F29F55BBD4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -17,9 +16,6 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -112,14 +108,15 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\CompositeObservableCollection.cs" />
-    <Compile Include="Collections\ObservableEnumerableAdapter.cs" />
+    <Compile Include="Collections\NullEntryDictionary.cs" />
+    <Compile Include="Collections\NullEntryObservableDictionary.cs" />
     <Compile Include="Collections\ObservableDictionary.cs" />
-    <Compile Include="Collections\ObservableHashSet.cs" />
     <Compile Include="Components\DelegateComparer.cs" />
     <Compile Include="Components\DisposableToken.cs" />
     <Compile Include="Components\DelegateDisposableToken.cs" />
@@ -143,8 +140,13 @@
     <Compile Include="Eventing\IEventPublisherTransaction.cs" />
     <Compile Include="Eventing\IEventTransactionSupport.cs" />
     <Compile Include="Eventing\UnsubscribeToken.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\StringEncryptionExt.cs" />
     <Compile Include="Text\ExceptionExtensions.cs" />
     <Compile Include="Text\StringExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Interlook.Commons.licenseheader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
