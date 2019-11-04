@@ -84,6 +84,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Security\StringEncryptionExtTests.cs" />
     <Compile Include="Text\StringExtensionPerformanceTests.cs" />
     <Compile Include="Text\StringExtensionTests.cs" />
   </ItemGroup>

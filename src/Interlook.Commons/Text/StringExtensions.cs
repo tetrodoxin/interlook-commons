@@ -22,8 +22,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
+
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -115,29 +117,6 @@ namespace Interlook.Text
         }
 
         /// <summary>
-        /// Computes the hash of the string using a specific hash algorithm.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="encoding">The character encoding used by the given string.</param>
-        /// <param name="algorithm">The algorithm to use fpr calculating the hash.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed hash for the given string. Any possible hyphens are trimmed.</returns>
-        public static string ComputeHashString(this string stringToHash, Encoding encoding, HashAlgorithm algorithm, string salt = null)
-        {
-            char[] passwordChars;
-            if (salt.AintNullNorEmpty())
-            {
-                passwordChars = (stringToHash + salt).ToArray();
-            }
-            else
-            {
-                passwordChars = stringToHash.ToArray();
-            }
-
-            return BitConverter.ToString(algorithm.ComputeHash(encoding.GetBytes(passwordChars))).Replace("-", "");
-        }
-
-        /// <summary>
         /// Ensures, that the corresponding string object is no <c>null</c>-reference.
         /// </summary>
         /// <param name="str">The string to test.</param>
@@ -145,96 +124,18 @@ namespace Interlook.Text
         public static string Ensure(this string str) => str ?? string.Empty;
 
         /// <summary>
-        /// Computes the SHA1 hash of a string.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed SHA1 hash for the given string.</returns>
-        public static string GetSHA1(this string stringToHash, string salt = null)
-        {
-            return GetSHA1(stringToHash, Encoding.UTF8, salt);
-        }
-
-        /// <summary>
-        /// Computes the SHA1 hash of a string.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="encoding">The character encoding used by the given string.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed SHA1 hash for the given string.</returns>
-        public static string GetSHA1(this string stringToHash, Encoding encoding, string salt = null)
-        {
-            var shaM = new SHA1CryptoServiceProvider();
-            return ComputeHashString(stringToHash, encoding, shaM, salt);
-        }
-
-        /// <summary>
-        /// Computes the SHA256 hash of a string.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed SHA256 hash for the given string.</returns>
-        public static string GetSHA256(this string stringToHash, string salt = null)
-        {
-            return GetSHA256(stringToHash, Encoding.UTF8, salt);
-        }
-
-        /// <summary>
-        /// Computes the SHA256 hash of a string.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="encoding">The character encoding used by the given string.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed SHA256 hash for the given string.</returns>
-        public static string GetSHA256(this string stringToHash, Encoding encoding, string salt = null)
-        {
-            var shaM = new SHA256Managed();
-            return ComputeHashString(stringToHash, encoding, shaM, salt);
-        }
-
-        /// <summary>
-        /// Computes the SHA512 hash of a string.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed SHA512 hash for the given string.</returns>
-        public static string GetSHA512(this string stringToHash, string salt = null)
-        {
-            return GetSHA512(stringToHash, Encoding.UTF8, salt);
-        }
-
-        /// <summary>
-        /// Computes the SHA512 hash of a string.
-        /// </summary>
-        /// <param name="stringToHash">The string to calculate the hash code for.</param>
-        /// <param name="encoding">The character encoding used by the given string.</param>
-        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
-        /// <returns>The string representation of the computed SHA512 hash for the given string.</returns>
-        public static string GetSHA512(this string stringToHash, Encoding encoding, string salt = null)
-        {
-            var shaM = new SHA512Managed();
-            return ComputeHashString(stringToHash, encoding, shaM, salt);
-        }
-
-        /// <summary>
         /// Indicates whether the string is <c>null</c> or an empty string.
         /// </summary>
         /// <param name="str">The string to test.</param>
         /// <returns><c>true</c> if the given string is <c>null</c> or an empty string. Otherwise <c>false</c>.</returns>
-        public static bool IsNullOrEmpty(this string str)
-        {
-            return String.IsNullOrEmpty(str);
-        }
+        public static bool IsNullOrEmpty(this string str) => String.IsNullOrEmpty(str);
 
         /// <summary>
         /// Indicates whether the string only contains decimal numbers.
         /// </summary>
         /// <param name="str">The string to test.</param>
         /// <returns><c>true</c> if the given string only contains decimal numbers.</returns>
-        public static bool IsNumericOnly(this string str)
-        {
-            return IsNumericOnly(str, new char[0]);
-        }
+        public static bool IsNumericOnly(this string str) => IsNumericOnly(str, new char[0]);
 
         /// <summary>
         /// Indicates whether the string only contains decimal numbers or special additional characters.

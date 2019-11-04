@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Interlook.Commons")]
 [assembly: AssemblyDescription("Another library of daily basis tools, one could wish to be included in .NET")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Andreas Hübner")]
+[assembly: AssemblyCompany("Andreas H.")]
 [assembly: AssemblyProduct("Interlook.Commons")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
@@ -40,5 +40,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("2209a1e4-f9e4-42f7-9c17-6ad1cd427831")]
 
-[assembly: AssemblyVersion("1.0.1.0")]
-[assembly: AssemblyInformationalVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.1.3")]
+[assembly: AssemblyInformationalVersion("1.0.1.3")]

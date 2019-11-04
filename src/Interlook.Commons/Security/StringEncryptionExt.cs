@@ -22,15 +22,19 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
+using System;
+
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace System
+namespace Interlook.Security
 {
     /// <summary>
     /// Helper Methods for string encryptions
@@ -39,6 +43,7 @@ namespace System
     {
         private const string DefaultSalt = "F[syek+c;,h:d+ovw#y;egvrz/omCc8*";
         private static readonly byte[] _entropyBytes = Encoding.UTF8.GetBytes("h7t2y=!5@YPFQEE^TYr-Rhu");
+
         private static byte[] DefaultInitVector = new byte[16]
         {
           (byte) 217,
@@ -58,6 +63,67 @@ namespace System
           (byte) 17,
           (byte) 93
         };
+
+        /// <summary>
+        /// Computes the hash of the string using a specific hash algorithm.
+        /// </summary>
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="encoding">The character encoding used by the given string.</param>
+        /// <param name="algorithm">The algorithm to use fpr calculating the hash.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed hash for the given string. Any possible hyphens are trimmed.</returns>
+        public static string ComputeHashString(this string stringToHash, Encoding encoding, HashAlgorithm algorithm, string salt = null)
+        {
+            char[] passwordChars;
+            if (!string.IsNullOrEmpty(salt))
+            {
+                passwordChars = (stringToHash + salt).ToArray();
+            }
+            else
+            {
+                passwordChars = stringToHash.ToArray();
+            }
+
+            return BitConverter.ToString(algorithm.ComputeHash(encoding.GetBytes(passwordChars))).Replace("-", "");
+        }
+
+        /// <summary>
+        /// Decrypts a string that has been encrypted with <see cref="EncryptStringForMachine(string)"/>
+        /// using the Windows DPAPI on the same machine.
+        /// </summary>
+        /// <param name="encryptedString">The <c>Base64</c>-representation of cipher data
+        /// created using <see cref="EncryptStringForMachine(string)"/>.</param>
+        /// <returns>The decrypted plaintext.</returns>
+        /// <remarks>
+        /// Decryption will fail, if the cipher data has been created within another windows context/machine.
+        /// </remarks>
+        public static string DecryptStringForMachine(this string encryptedString)
+        {
+            byte[] bytes = ProtectedData.Unprotect(
+                Convert.FromBase64String(encryptedString),
+                _entropyBytes,
+                DataProtectionScope.LocalMachine);
+            return Encoding.UTF8.GetString(bytes);
+        }
+
+        /// <summary>
+        /// Decrypts a string that has been encrypted with <see cref="EncryptStringForUser(string)"/>
+        /// using the Windows DPAPI for the same user.
+        /// </summary>
+        /// <param name="encryptedString">The <c>Base64</c>-representation of cipher data
+        /// created using <see cref="EncryptStringForUser(string)"/>.</param>
+        /// <returns>The decrypted plaintext.</returns>
+        /// <remarks>
+        /// Decryption will fail, if the cipher data has been created within another windows user context.
+        /// </remarks>
+        public static string DecryptStringForUser(this string encryptedString)
+        {
+            byte[] bytes = ProtectedData.Unprotect(
+                Convert.FromBase64String(encryptedString),
+                _entropyBytes,
+                DataProtectionScope.CurrentUser);
+            return Encoding.UTF8.GetString(bytes);
+        }
 
         /// <summary>
         /// Decrypts the given binary data with AES256 into a string using given character encoding
@@ -92,6 +158,30 @@ namespace System
         }
 
         /// <summary>
+        /// Encrypts the string using Windows DPAPI for the context of the local machine.
+        /// </summary>
+        /// <param name="value">The plaintext to encrypt.</param>
+        /// <returns>A <see cref="string"/> with the <c>Base64</c> representation of the cipher data.</returns>
+        public static string EncryptStringForMachine(this string value)
+                    => Convert.ToBase64String(
+                        ProtectedData.Protect(
+                            Encoding.UTF8.GetBytes(value ?? string.Empty),
+                            _entropyBytes,
+                            DataProtectionScope.LocalMachine));
+
+        /// <summary>
+        /// Encrypts the string using Windows DPAPI for the context of the current user.
+        /// </summary>
+        /// <param name="value">The plaintext to encrypt.</param>
+        /// <returns>A <see cref="string"/> with the <c>Base64</c> representation of the cipher data.</returns>
+        public static string EncryptStringForUser(this string value)
+                    => Convert.ToBase64String(
+                        ProtectedData.Protect(
+                            Encoding.UTF8.GetBytes(value ?? string.Empty),
+                            _entropyBytes,
+                            DataProtectionScope.CurrentUser));
+
+        /// <summary>
         /// Encrypts a string using AES256
         /// </summary>
         /// <param name="plainText">String to encrypt.</param>
@@ -118,66 +208,90 @@ namespace System
         }
 
         /// <summary>
-        /// Decrypts a string that has been encrypted with <see cref="EncryptStringForUser(string)"/>
-        /// using the Windows DPAPI for the same user.
+        /// Computes the MD5 hash of a string.
         /// </summary>
-        /// <param name="encryptedString">The <c>Base64</c>-representation of cipher data
-        /// created using <see cref="EncryptStringForUser(string)"/>.</param>
-        /// <returns>The decrypted plaintext.</returns>
-        /// <remarks>
-        /// Decryption will fail, if the cipher data has been created within another windows user context.
-        /// </remarks>
-        public static string DecryptStringForUser(string encryptedString)
+        /// <param name="stringToHash">string to hash.</param>
+        /// <param name="salt">Optional salt.</param>
+        /// <returns>The string representation of the computed MD5 hash for the given string.</returns>
+        public static string GetMD5(this string stringToHash, string salt = null) => GetMD5(stringToHash, Encoding.UTF8, salt);
+
+        /// <summary>
+        /// Computes the MD5 hash of a string.
+        /// </summary>
+        /// <param name="stringToHash">string to hash.</param>
+        /// <param name="encoding">The encoding to use.</param>
+        /// <param name="salt">Optional salt.</param>
+        /// <returns>
+        /// The string representation of the computed MD5 hash for the given string.
+        /// </returns>
+        public static string GetMD5(this string stringToHash, Encoding encoding, string salt = null)
         {
-            byte[] bytes = ProtectedData.Unprotect(
-                Convert.FromBase64String(encryptedString),
-                _entropyBytes,
-                DataProtectionScope.CurrentUser);
-            return Encoding.UTF8.GetString(bytes);
+            var md5Hasher = MD5.Create();
+            return ComputeHashString(stringToHash, encoding, md5Hasher, salt);
         }
 
         /// <summary>
-        /// Decrypts a string that has been encrypted with <see cref="EncryptStringForMachine(string)"/>
-        /// using the Windows DPAPI on the same machine.
+        /// Computes the SHA1 hash of a string.
         /// </summary>
-        /// <param name="encryptedString">The <c>Base64</c>-representation of cipher data
-        /// created using <see cref="EncryptStringForMachine(string)"/>.</param>
-        /// <returns>The decrypted plaintext.</returns>
-        /// <remarks>
-        /// Decryption will fail, if the cipher data has been created within another windows context/machine.
-        /// </remarks>
-        public static string DecryptStringForMachine(string encryptedString)
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed SHA1 hash for the given string.</returns>
+        public static string GetSHA1(this string stringToHash, string salt = null) => GetSHA1(stringToHash, Encoding.UTF8, salt);
+
+        /// <summary>
+        /// Computes the SHA1 hash of a string.
+        /// </summary>
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="encoding">The character encoding used by the given string.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed SHA1 hash for the given string.</returns>
+        public static string GetSHA1(this string stringToHash, Encoding encoding, string salt = null)
         {
-            byte[] bytes = ProtectedData.Unprotect(
-                Convert.FromBase64String(encryptedString),
-                _entropyBytes,
-                DataProtectionScope.LocalMachine);
-            return Encoding.UTF8.GetString(bytes);
+            var shaM = new SHA1CryptoServiceProvider();
+            return ComputeHashString(stringToHash, encoding, shaM, salt);
         }
 
         /// <summary>
-        /// Encrypts the string using Windows DPAPI for the context of the local machine.
+        /// Computes the SHA256 hash of a string.
         /// </summary>
-        /// <param name="value">The plaintext to encrypt.</param>
-        /// <returns>A <see cref="string"/> with the <c>Base64</c> representation of the cipher data.</returns>
-        public static string EncryptStringForMachine(string value)
-                    => Convert.ToBase64String(
-                        ProtectedData.Protect(
-                            Encoding.UTF8.GetBytes(value ?? string.Empty),
-                            _entropyBytes,
-                            DataProtectionScope.LocalMachine));
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed SHA256 hash for the given string.</returns>
+        public static string GetSHA256(this string stringToHash, string salt = null) => GetSHA256(stringToHash, Encoding.UTF8, salt);
 
         /// <summary>
-        /// Encrypts the string using Windows DPAPI for the context of the current user.
+        /// Computes the SHA256 hash of a string.
         /// </summary>
-        /// <param name="value">The plaintext to encrypt.</param>
-        /// <returns>A <see cref="string"/> with the <c>Base64</c> representation of the cipher data.</returns>
-        public static string EncryptStringForUser(string value)
-                    => Convert.ToBase64String(
-                        ProtectedData.Protect(
-                            Encoding.UTF8.GetBytes(value ?? string.Empty),
-                            _entropyBytes,
-                            DataProtectionScope.CurrentUser));
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="encoding">The character encoding used by the given string.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed SHA256 hash for the given string.</returns>
+        public static string GetSHA256(this string stringToHash, Encoding encoding, string salt = null)
+        {
+            var shaM = new SHA256Managed();
+            return ComputeHashString(stringToHash, encoding, shaM, salt);
+        }
+
+        /// <summary>
+        /// Computes the SHA512 hash of a string.
+        /// </summary>
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed SHA512 hash for the given string.</returns>
+        public static string GetSHA512(this string stringToHash, string salt = null) => GetSHA512(stringToHash, Encoding.UTF8, salt);
+
+        /// <summary>
+        /// Computes the SHA512 hash of a string.
+        /// </summary>
+        /// <param name="stringToHash">The string to calculate the hash code for.</param>
+        /// <param name="encoding">The character encoding used by the given string.</param>
+        /// <param name="salt">A trailing salt string, appended before hashing (optional, may be <c>null</c>).</param>
+        /// <returns>The string representation of the computed SHA512 hash for the given string.</returns>
+        public static string GetSHA512(this string stringToHash, Encoding encoding, string salt = null)
+        {
+            var shaM = new SHA512Managed();
+            return ComputeHashString(stringToHash, encoding, shaM, salt);
+        }
 
         private static void commitToResultList(bool condition, List<string> result, StringBuilder sb)
         {
@@ -186,22 +300,6 @@ namespace System
                 result.Add(sb.ToString());
                 sb.Clear();
             }
-        }
-
-        private static bool isStringNothing(string str)
-        {
-            if (!string.IsNullOrEmpty(str))
-            {
-                if (!string.IsNullOrWhiteSpace(str))
-                {
-                    if (str.Trim().Length > 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
 
         private static byte[] createKeyBytes(SecureString passphrase, string completeSalt, Encoding encoding)
@@ -291,6 +389,22 @@ namespace System
         private static byte[] encryptStringToBytesAES(string plainText, byte[] key, byte[] iv, Encoding encoding)
         {
             return encryptBytesToBytesAES(encoding.GetBytes(plainText), key, iv);
+        }
+
+        private static bool isStringNothing(string str)
+        {
+            if (!string.IsNullOrEmpty(str))
+            {
+                if (!string.IsNullOrWhiteSpace(str))
+                {
+                    if (str.Trim().Length > 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }
