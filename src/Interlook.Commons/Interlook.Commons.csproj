@@ -8,7 +8,7 @@
     <Company>Andreas H.</Company>
     <Description>Another library of daily basis tools, one could wish to be included in .NET</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>2016-2019 tetrodoxin</Copyright>
+    <Copyright>2013-2019 tetrodoxin</Copyright>
     <RepositoryUrl>https://github.com/tetrodoxin/interlook-commons.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/tetrodoxin/interlook-commons</PackageProjectUrl>
     <PackageTags>general, csharp, library, extension, miscellaneous, general-purpose</PackageTags>

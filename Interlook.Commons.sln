@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8C10F2BB-91ED-447A-817F-9D8C32F5A584}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interlook.Commons", "src\Interlook.Commons\Interlook.Commons.csproj", "{6DA306F9-E58C-4E3C-851D-A2D12D923337}"
