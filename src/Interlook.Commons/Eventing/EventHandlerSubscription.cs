@@ -24,92 +24,91 @@
 
 #endregion 
 using System;
-using System.Diagnostics.Contracts;
 
 namespace Interlook.Eventing
 {
-	public class EventHandlerSubscription<TEvent> : EventSubscriptionBase<TEvent>
-		where TEvent : IEvent
-	{
-		#region Fields
+    public class EventHandlerSubscription<TEvent> : EventSubscriptionBase<TEvent>
+        where TEvent : IEvent
+    {
+        #region Fields
 
-		private readonly WeakReference weakReference;
-		private readonly IEventHandlerFor<TEvent> directHandler = null;
-		private bool wasLost = false;
+        private readonly WeakReference _weakReference;
+        private readonly IEventHandlerFor<TEvent> _directHandler = null;
+        private bool _wasLost = false;
 
-		#endregion Fields
+        #endregion Fields
 
-		#region Constructors
+        #region Constructors
 
-		public EventHandlerSubscription(IEventHandlerFor<TEvent> eventHandler, bool useWeakReference, Action<IUnsubscribeToken> unsubscribeAction)
-			: base(unsubscribeAction)
-		{
-			Contract.Requires<ArgumentNullException>(eventHandler != null, "eventHandler");
-			Contract.Requires<ArgumentNullException>(unsubscribeAction != null, "unsubscribeAction");
+        public EventHandlerSubscription(IEventHandlerFor<TEvent> eventHandler, bool useWeakReference, Action<IUnsubscribeToken> unsubscribeAction)
+            : base(unsubscribeAction)
+        {
+            if (eventHandler == null) throw new ArgumentNullException(nameof(eventHandler));
+            if (unsubscribeAction == null) throw new ArgumentNullException(nameof(unsubscribeAction));
 
-			if (useWeakReference)
-			{
-				this.weakReference = new WeakReference(eventHandler);
-			}
-			else
-			{
-				this.directHandler = eventHandler;
-			}
-		}
+            if (useWeakReference)
+            {
+                this._weakReference = new WeakReference(eventHandler);
+            }
+            else
+            {
+                this._directHandler = eventHandler;
+            }
+        }
 
-		#endregion Constructors
+        #endregion Constructors
 
-		#region Public Methods
+        #region Public Methods
 
-		public override bool CanHandle(TEvent ev)
-		{
-			var handler = GetHandler();
-			if (handler != null)
-			{
-				return handler.CanHandle(ev);
-			}
-			else
-			{
-				return false;
-			}
-		}
+        public override bool CanHandle(TEvent ev)
+        {
+            var handler = GetHandler();
+            if (handler != null)
+            {
+                return handler.CanHandle(ev);
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-		public override void Handle(TEvent ev)
-		{
-			var handler = GetHandler();
-			if (handler != null)
-			{
-				handler.Handle(ev);
-			}
-		}
+        public override void Handle(TEvent ev)
+        {
+            var handler = GetHandler();
+            if (handler != null)
+            {
+                handler.Handle(ev);
+            }
+        }
 
-		#endregion Public Methods
+        #endregion Public Methods
 
-		#region Private Methods
+        #region Private Methods
 
-		internal IEventHandlerFor<TEvent> GetHandler()
-		{
-			if (wasLost)
-			{
-				return null;
-			}
-			if (directHandler != null)
-			{
-				return directHandler;
-			}
-			else
-			{
-				var r = this.weakReference.Target as IEventHandlerFor<TEvent>;
-				if (r == null || !this.weakReference.IsAlive)
-				{
-					wasLost = true;
-					this.Unsubscribe();
-				}
+        internal IEventHandlerFor<TEvent> GetHandler()
+        {
+            if (_wasLost)
+            {
+                return null;
+            }
+            if (_directHandler != null)
+            {
+                return _directHandler;
+            }
+            else
+            {
+                var r = this._weakReference.Target as IEventHandlerFor<TEvent>;
+                if (r == null || !this._weakReference.IsAlive)
+                {
+                    _wasLost = true;
+                    this.Unsubscribe();
+                }
 
-				return r;
-			}
-		}
+                return r;
+            }
+        }
 
-		#endregion Private Methods
-	}
+        #endregion Private Methods
+    }
 }

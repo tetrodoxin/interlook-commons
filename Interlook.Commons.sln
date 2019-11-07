@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interlook.Commons", "src\Interlook.Commons\Interlook.Commons.csproj", "{56BE02E9-760E-42BA-8C9E-F0F29F55BBD4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7503076D-27D6-4DDF-9FFD-CAE6AD8FE976}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -12,12 +10,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{750307
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interlook.Commons.Tests", "src\Interlook.Commons.Tests\Interlook.Commons.Tests.csproj", "{3ECB2BEE-999E-4817-AF1E-6F1BEA105DA0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8C10F2BB-91ED-447A-817F-9D8C32F5A584}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interlook.Commons", "src\Interlook.Commons\Interlook.Commons.csproj", "{6DA306F9-E58C-4E3C-851D-A2D12D923337}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interlook.Commons.Tests", "src\Interlook.Commons.Tests\Interlook.Commons.Tests.csproj", "{0DF58369-2098-4932-A017-A16098D9928D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,15 +25,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{56BE02E9-760E-42BA-8C9E-F0F29F55BBD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{56BE02E9-760E-42BA-8C9E-F0F29F55BBD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{56BE02E9-760E-42BA-8C9E-F0F29F55BBD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{56BE02E9-760E-42BA-8C9E-F0F29F55BBD4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3ECB2BEE-999E-4817-AF1E-6F1BEA105DA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3ECB2BEE-999E-4817-AF1E-6F1BEA105DA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3ECB2BEE-999E-4817-AF1E-6F1BEA105DA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DA306F9-E58C-4E3C-851D-A2D12D923337}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DA306F9-E58C-4E3C-851D-A2D12D923337}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DA306F9-E58C-4E3C-851D-A2D12D923337}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DA306F9-E58C-4E3C-851D-A2D12D923337}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DF58369-2098-4932-A017-A16098D9928D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DF58369-2098-4932-A017-A16098D9928D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DF58369-2098-4932-A017-A16098D9928D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DF58369-2098-4932-A017-A16098D9928D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C3078C37-59C0-483D-92C8-B5492180D9AB}
 	EndGlobalSection
 EndGlobal

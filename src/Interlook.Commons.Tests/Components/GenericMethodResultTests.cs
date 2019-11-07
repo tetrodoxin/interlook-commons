@@ -1,147 +1,141 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Interlook.Components;
 using Xunit;
-using Xunit.Extensions;
-using Interlook.Components.Tests;
 
-public class GenericMethodResultTests
+namespace Interlook.Components.Tests
 {
-	#region Constants
+    public class GenericMethodResultTests
+    {
+        #region Constants
 
-	private static readonly MethodResultTestObject SuccessObject = new MethodResultTestObject("My piece of cake.");
-	private static readonly int ErrorCode = 303;
-	private static readonly string ErrorMessage = "It failed definitely.";
-	private static readonly Exception ErrorException = new InvalidOperationException("This was exceptionally wrong.");
+        private static readonly MethodResultTestObject SuccessObject = new MethodResultTestObject("My piece of cake.");
+        private static readonly int ErrorCode = 303;
+        private static readonly string ErrorMessage = "It failed definitely.";
+        private static readonly Exception ErrorException = new InvalidOperationException("This was exceptionally wrong.");
 
-	#endregion Constants
+        #endregion Constants
 
-	#region Factory methods tests
+        #region Factory methods tests
 
-	[Fact]
-	public void CreateSuccessWithObjectTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+        [Fact]
+        public void CreateSuccessWithObjectTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
 
-		Assert.Equal(MethodResult.CODE_SUCCESS, actual.ReturnCode);
-		Assert.Equal<MethodResultTestObject>(SuccessObject, actual.Result);
-	}
+            Assert.Equal(MethodResult.CODE_SUCCESS, actual.ReturnCode);
+            Assert.Equal<MethodResultTestObject>(SuccessObject, actual.Result);
+        }
 
-	[Fact]
-	public void CreateFailedWithErrorCodeTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorCode);
-		Assert.Equal(ErrorCode, actual.ReturnCode);
-	}
+        [Fact]
+        public void CreateFailedWithErrorCodeTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorCode);
+            Assert.Equal(ErrorCode, actual.ReturnCode);
+        }
 
-	[Fact]
-	public void CreateFailedWithMessageTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorMessage);
+        [Fact]
+        public void CreateFailedWithMessageTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorMessage);
 
-		Assert.Equal(ErrorMessage, actual.ReturnMessage);
-		Assert.NotEqual<int>(MethodResult.CODE_SUCCESS, actual.ReturnCode);
-	}
+            Assert.Equal(ErrorMessage, actual.ReturnMessage);
+            Assert.NotEqual(MethodResult.CODE_SUCCESS, actual.ReturnCode);
+        }
 
-	[Fact]
-	public void CreateFailedWithExceptionTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorException);
+        [Fact]
+        public void CreateFailedWithExceptionTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorException);
 
-		Assert.ThrowsDelegate action = () => actual.ThrowOnError();
+            var ex = Assert.Throws<InvalidOperationException>(() => actual.ThrowOnError());
+            Assert.Equal(ErrorException.Message, ex.Message);
+        }
 
-		Assert.Throws(ErrorException.GetType(), action);
-	}
+        [Fact]
+        public void CreateFailedWithCodeAndMessageTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorCode, ErrorMessage);
 
-	[Fact]
-	public void CreateFailedWithCodeAndMessageTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorCode, ErrorMessage);
+            Assert.Equal(ErrorMessage, actual.ReturnMessage);
+            Assert.Equal(ErrorCode, actual.ReturnCode);
+        }
 
-		Assert.Equal(ErrorMessage, actual.ReturnMessage);
-		Assert.Equal<int>(ErrorCode, actual.ReturnCode);
-	}
+        [Fact]
+        public void CreateFailedWithCodeAndExceptionTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorCode, ErrorException);
 
-	[Fact]
-	public void CreateFailedWithCodeAndExceptionTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorCode, ErrorException);
+            var ex = Assert.Throws<InvalidOperationException>(() => actual.ThrowOnError());
+            Assert.Equal(ErrorException.Message, ex.Message);
+            Assert.Equal(ErrorCode, actual.ReturnCode);
+        }
 
-		Assert.ThrowsDelegate action = () => actual.ThrowOnError();
+        #endregion Factory methods tests
 
-		Assert.Throws(ErrorException.GetType(), action);
-		Assert.Equal<int>(ErrorCode, actual.ReturnCode);
-	}
+        #region Behavior tests
 
-	#endregion Factory methods tests
+        [Fact]
+        public void SuccessResultDoesNotThrowTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
 
-	#region Behavior tests
+            actual.ThrowOnError();
+        }
 
-	[Fact]
-	public void SuccessResultDoesNotThrowTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+        [Fact]
+        public void SuccessCastsToTrueImplicitelyTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
 
-		Assert.ThrowsDelegate action = () => actual.ThrowOnError();
-		Assert.DoesNotThrow(action);
-	}
+            bool result = false;
+            result = actual;
 
-	[Fact]
-	public void SuccessCastsToTrueImplicitelyTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+            Assert.True(result, "Success MethodResult<MethodResultTestObject> did not cast to true implicitely.");
+        }
 
-		bool result = false;
-		result = actual;
+        [Fact]
+        public void SuccessCastsToTrueExplicitelyTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
 
-		Assert.True(result, "Success MethodResult<MethodResultTestObject> did not cast to true implicitely.");
-	}
+            Assert.True((bool)actual, "Success MethodResult<MethodResultTestObject> did not cast to true explicitely.");
+        }
 
-	[Fact]
-	public void SuccessCastsToTrueExplicitelyTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+        [Fact]
+        public void SuccessCastsToResultExplicitelyTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+            Assert.Equal<MethodResultTestObject>(SuccessObject, actual);
+        }
 
-		Assert.True((bool)actual, "Success MethodResult<MethodResultTestObject> did not cast to true explicitely.");
-	}
+        [Fact]
+        public void SuccessCastsToResultImplicitelyTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+            Assert.Equal(SuccessObject, (MethodResultTestObject)actual);
+        }
 
-	[Fact]
-	public void SuccessCastsToResultExplicitelyTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
-		Assert.Equal<MethodResultTestObject>(SuccessObject, actual);
-	}
+        [Fact]
+        public void SuccessCastsToNonGenericMethodResultImplicitelyTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
 
-	[Fact]
-	public void SuccessCastsToResultImplicitelyTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
-		Assert.Equal(SuccessObject, (MethodResultTestObject)actual);
-	}
+            MethodResult mr;
+            mr = actual;
 
-	[Fact]
-	public void SuccessCastsToNonGenericMethodResultImplicitelyTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+            Assert.Equal(MethodResult.CODE_SUCCESS, mr.ReturnCode);
+            Assert.Equal<MethodResultTestObject>(SuccessObject, mr.Result as MethodResultTestObject);
+        }
 
-		MethodResult mr;
-		mr = actual;
+        [Fact]
+        public void SuccessCastsToNonGenericMethodResultExplicitelyTest()
+        {
+            var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
+            var mr = (MethodResult)actual;
 
-		Assert.Equal(MethodResult.CODE_SUCCESS, mr.ReturnCode);
-		Assert.Equal<MethodResultTestObject>(SuccessObject, mr.Result as MethodResultTestObject);
-	}
+            Assert.Equal(MethodResult.CODE_SUCCESS, mr.ReturnCode);
+            Assert.Equal<MethodResultTestObject>(SuccessObject, mr.Result as MethodResultTestObject);
+        }
 
-	[Fact]
-	public void SuccessCastsToNonGenericMethodResultExplicitelyTest()
-	{
-		var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
-		var mr = (MethodResult)actual;
-
-		Assert.Equal(MethodResult.CODE_SUCCESS, mr.ReturnCode);
-		Assert.Equal<MethodResultTestObject>(SuccessObject, mr.Result as MethodResultTestObject);
-	}
-
-	#endregion Behavior tests
+        #endregion Behavior tests
+    }
 }

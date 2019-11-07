@@ -4,181 +4,182 @@ using Interlook.Eventing.Tests;
 using Xunit;
 using Xunit.Extensions;
 
-public class SourceAndPublishingTests
+namespace Interlook.Eventing.Tests
 {
-	protected IEventBus EventBus { get; private set; }
+    public class SourceAndPublishingTests
+    {
+        protected IEventBus EventBus { get; private set; }
 
-	public SourceAndPublishingTests()
-	{
-		EventBus = new EventBus();
-	}
+        public SourceAndPublishingTests()
+        {
+            EventBus = new EventBus();
+        }
 
-	[Fact]
-	public void CanSubscribeDelegateTest()
-	{
-		Assert.ThrowsDelegate action = () => EventBus.Subscribe<TestEvent>(p => { });
-		Assert.DoesNotThrow(action);
-	}
+        [Fact]
+        public void CanSubscribeDelegateTest()
+        {
+            EventBus.Subscribe<TestEvent>(p => { });
+        }
 
-	[Fact]
-	public void PublishedEventHandledByDelegateTest()
-	{
-		var wasHandled = false;
-		var subscription = EventBus.Subscribe<TestEvent>(p => wasHandled = true);
-		EventBus.Publish<TestEvent>(new TestEvent(null));
+        [Fact]
+        public void PublishedEventHandledByDelegateTest()
+        {
+            var wasHandled = false;
+            var subscription = EventBus.Subscribe<TestEvent>(p => wasHandled = true);
+            EventBus.Publish(new TestEvent(null));
 
-		Assert.True(wasHandled, "Registered delegate not invoked by publish.");
-	}
+            Assert.True(wasHandled, "Registered delegate not invoked by publish.");
+        }
 
-	[Fact]
-	public void PublishedEventHandledFilteredDelegateTest()
-	{
-		var wasHandled = false;
-		var eventPredicate = "correct";
-		var definiteWrong = "not correct";
+        [Fact]
+        public void PublishedEventHandledFilteredDelegateTest()
+        {
+            var wasHandled = false;
+            var eventPredicate = "correct";
+            var definiteWrong = "not correct";
 
-		Action<TestEvent> action = p => wasHandled = true;
-		Func<TestEvent, bool> filter = p => eventPredicate.Equals(p.Data);
+            Action<TestEvent> action = p => wasHandled = true;
+            Func<TestEvent, bool> filter = p => eventPredicate.Equals(p.Data);
 
-		var subscription = EventBus.Subscribe<TestEvent>(action, filter);
+            var subscription = EventBus.Subscribe(action, filter);
 
-		EventBus.Publish<TestEvent>(new TestEvent(eventPredicate));
-		Assert.True(wasHandled, "Registered delegate not invoked by publish.");
+            EventBus.Publish(new TestEvent(eventPredicate));
+            Assert.True(wasHandled, "Registered delegate not invoked by publish.");
 
-		wasHandled = false;
-		EventBus.Publish<TestEvent>(new TestEvent(definiteWrong));
-		Assert.False(wasHandled, "Registered delegate was invoked although actually was expected to fail the filter.");
-	}
+            wasHandled = false;
+            EventBus.Publish(new TestEvent(definiteWrong));
+            Assert.False(wasHandled, "Registered delegate was invoked although actually was expected to fail the filter.");
+        }
 
-	[Fact]
-	public void PublishedEventHandledSpecificEventTest()
-	{
-		var result = String.Empty;
-		var original = "Event";
-		var delta = "_Raised";
+        [Fact]
+        public void PublishedEventHandledSpecificEventTest()
+        {
+            var result = String.Empty;
+            var original = "Event";
+            var delta = "_Raised";
 
-		var subscription = EventBus.Subscribe<TestEvent>(p => result = p.Data + delta);
-		EventBus.Publish<TestEvent>(new TestEvent(original));
+            var subscription = EventBus.Subscribe<TestEvent>(p => result = p.Data + delta);
+            EventBus.Publish(new TestEvent(original));
 
-		Assert.Equal(original + delta, result);
-	}
+            Assert.Equal(original + delta, result);
+        }
 
-	[Fact]
-	public void UnSubscribeDelegateViaDisposeTest()
-	{
-		var wasHandled = false;
-		using (var subscription = EventBus.Subscribe<TestEvent>(p => wasHandled = !wasHandled))
-		{
-			EventBus.Publish<TestEvent>(new TestEvent(null));
-			Assert.True(wasHandled, "Registered delegate not invoked by publish.");
-		}
+        [Fact]
+        public void UnSubscribeDelegateViaDisposeTest()
+        {
+            var wasHandled = false;
+            using (var subscription = EventBus.Subscribe<TestEvent>(p => wasHandled = !wasHandled))
+            {
+                EventBus.Publish(new TestEvent(null));
+                Assert.True(wasHandled, "Registered delegate not invoked by publish.");
+            }
 
-		EventBus.Publish<TestEvent>(new TestEvent(null));
-		Assert.True(wasHandled, "Registered delegate invoked although subscription was disposed.");
-	}
+            EventBus.Publish(new TestEvent(null));
+            Assert.True(wasHandled, "Registered delegate invoked although subscription was disposed.");
+        }
 
-	[Fact]
-	public void UnSubscribeDelegateViaUnsubscriptionToken()
-	{
-		var wasHandled = false;
-		var subscription = EventBus.Subscribe<TestEvent>(p => wasHandled = !wasHandled);
-		EventBus.Publish<TestEvent>(new TestEvent(null));
-		Assert.True(wasHandled, "Registered delegate not invoked by publish.");
-		EventBus.Unsubscribe(subscription);
+        [Fact]
+        public void UnSubscribeDelegateViaUnsubscriptionToken()
+        {
+            var wasHandled = false;
+            var subscription = EventBus.Subscribe<TestEvent>(p => wasHandled = !wasHandled);
+            EventBus.Publish(new TestEvent(null));
+            Assert.True(wasHandled, "Registered delegate not invoked by publish.");
+            EventBus.Unsubscribe(subscription);
 
-		EventBus.Publish<TestEvent>(new TestEvent(null));
-		Assert.True(wasHandled, "Registered delegate invoked although unsubscription has been called.");
-	}
+            EventBus.Publish(new TestEvent(null));
+            Assert.True(wasHandled, "Registered delegate invoked although unsubscription has been called.");
+        }
 
-	[Fact]
-	public void UnSubscribeDelegateViaUnsubscribeDelegateMethodTest()
-	{
-		var wasHandled = false;
-		Action<TestEvent> action = new Action<TestEvent>(p => wasHandled = !wasHandled);
-		var subscription = EventBus.Subscribe<TestEvent>(action);
-		EventBus.Publish<TestEvent>(new TestEvent(null));
-		Assert.True(wasHandled, "Registered delegate not invoked by publish.");
-		EventBus.Unsubscribe(action);
+        [Fact]
+        public void UnSubscribeDelegateViaUnsubscribeDelegateMethodTest()
+        {
+            var wasHandled = false;
+            Action<TestEvent> action = new Action<TestEvent>(p => wasHandled = !wasHandled);
+            var subscription = EventBus.Subscribe(action);
+            EventBus.Publish(new TestEvent(null));
+            Assert.True(wasHandled, "Registered delegate not invoked by publish.");
+            EventBus.Unsubscribe(action);
 
-		EventBus.Publish<TestEvent>(new TestEvent(null));
-		Assert.True(wasHandled, "Registered delegate invoked although unsubscription has been called.");
-	}
+            EventBus.Publish(new TestEvent(null));
+            Assert.True(wasHandled, "Registered delegate invoked although unsubscription has been called.");
+        }
 
-	[Fact]
-	public void CanRegisterHandlerTest()
-	{
-		var handler = new StringAppendingTestEventHandler("_tested");
-		Assert.ThrowsDelegate action = () => EventBus.RegisterHandlerFor<TestEvent>(handler);
-		Assert.DoesNotThrow(action);
-	}
+        [Fact]
+        public void CanRegisterHandlerTest()
+        {
+            var handler = new StringAppendingTestEventHandler("_tested");
+            EventBus.RegisterHandlerFor(handler);
+        }
 
-	[Fact]
-	public void PublishedEventHandledByHandlerTest()
-	{
-		var original = "start";
-		var delta = "_tested";
-		var handler = new StringAppendingTestEventHandler(delta);
-		EventBus.RegisterHandlerFor<TestEvent>(handler);
+        [Fact]
+        public void PublishedEventHandledByHandlerTest()
+        {
+            var original = "start";
+            var delta = "_tested";
+            var handler = new StringAppendingTestEventHandler(delta);
+            EventBus.RegisterHandlerFor(handler);
 
-		var ev = new TestEvent(original);
-		EventBus.Publish(ev);
+            var ev = new TestEvent(original);
+            EventBus.Publish(ev);
 
-		Assert.Equal(original + delta, ev.Data);
-	}
+            Assert.Equal(original + delta, ev.Data);
+        }
 
-	[Fact]
-	public void UnregisterHandlerViaDisposeTest()
-	{
-		var original = "active";
-		var delta = "_tested";
-		var ev = new TestEvent(original);
-		var handler = new StringAppendingTestEventHandler(delta);
-		using (var subscription = EventBus.RegisterHandlerFor<TestEvent>(handler))
-		{
-			EventBus.Publish<TestEvent>(ev);
-			Assert.Equal(original + delta, ev.Data);
-		}
+        [Fact]
+        public void UnregisterHandlerViaDisposeTest()
+        {
+            var original = "active";
+            var delta = "_tested";
+            var ev = new TestEvent(original);
+            var handler = new StringAppendingTestEventHandler(delta);
+            using (var subscription = EventBus.RegisterHandlerFor<TestEvent>(handler))
+            {
+                EventBus.Publish(ev);
+                Assert.Equal(original + delta, ev.Data);
+            }
 
-		original = "disposed";
-		ev = new TestEvent(original);
-		EventBus.Publish<TestEvent>(ev);
-		Assert.Equal(original, ev.Data);
-	}
+            original = "disposed";
+            ev = new TestEvent(original);
+            EventBus.Publish(ev);
+            Assert.Equal(original, ev.Data);
+        }
 
-	[Fact]
-	public void UnregisterHandlerViaUnsubscriptionToken()
-	{
-		var original = "start";
-		var delta = "_tested";
-		var ev = new TestEvent(original);
-		var handler = new StringAppendingTestEventHandler(delta);
-		var subscription = EventBus.RegisterHandlerFor<TestEvent>(handler);
-		EventBus.Publish<TestEvent>(ev);
-		Assert.Equal(original + delta, ev.Data);
-		EventBus.Unsubscribe(subscription);
+        [Fact]
+        public void UnregisterHandlerViaUnsubscriptionToken()
+        {
+            var original = "start";
+            var delta = "_tested";
+            var ev = new TestEvent(original);
+            var handler = new StringAppendingTestEventHandler(delta);
+            var subscription = EventBus.RegisterHandlerFor<TestEvent>(handler);
+            EventBus.Publish(ev);
+            Assert.Equal(original + delta, ev.Data);
+            EventBus.Unsubscribe(subscription);
 
-		original = "disposed";
-		ev = new TestEvent(original);
-		EventBus.Publish<TestEvent>(ev);
-		Assert.Equal(original, ev.Data);
-	}
+            original = "disposed";
+            ev = new TestEvent(original);
+            EventBus.Publish(ev);
+            Assert.Equal(original, ev.Data);
+        }
 
-	[Fact]
-	public void UnregisterHandlerViaUnregisterHandlerMethodTest()
-	{
-		var original = "start";
-		var delta = "_tested";
-		var ev = new TestEvent(original);
-		var handler = new StringAppendingTestEventHandler(delta);
-		var subscription = EventBus.RegisterHandlerFor<TestEvent>(handler);
-		EventBus.Publish<TestEvent>(ev);
-		Assert.Equal(original + delta, ev.Data);
+        [Fact]
+        public void UnregisterHandlerViaUnregisterHandlerMethodTest()
+        {
+            var original = "start";
+            var delta = "_tested";
+            var ev = new TestEvent(original);
+            var handler = new StringAppendingTestEventHandler(delta);
+            var subscription = EventBus.RegisterHandlerFor(handler);
+            EventBus.Publish(ev);
+            Assert.Equal(original + delta, ev.Data);
 
-		EventBus.UnregisterHandlerFor(handler);
+            EventBus.UnregisterHandlerFor(handler);
 
-		original = "disposed";
-		ev = new TestEvent(original);
-		EventBus.Publish<TestEvent>(ev);
-		Assert.Equal(original, ev.Data);
-	}
+            original = "disposed";
+            ev = new TestEvent(original);
+            EventBus.Publish(ev);
+            Assert.Equal(original, ev.Data);
+        }
+    }
 }

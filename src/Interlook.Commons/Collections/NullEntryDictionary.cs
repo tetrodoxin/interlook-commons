@@ -26,7 +26,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Interlook.Collections
 {
@@ -139,7 +138,7 @@ namespace Interlook.Collections
                     TValue nullValue,
                     Func<IEnumerator<KeyValuePair<TKey, TValue>>> baseEnumeratorFactoryMethod)
         {
-            Contract.Requires<ArgumentNullException>(dictionary != null);
+            if (dictionary == null) throw new ArgumentNullException(nameof(dictionary));
 
             _isReset = true;
             _isFirst = false;

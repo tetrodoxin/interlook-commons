@@ -24,10 +24,6 @@
 
 #endregion 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
 
 namespace Interlook.Components
 {
@@ -45,7 +41,7 @@ namespace Interlook.Components
         /// <param name="action">The action to perform at disposal.</param>
         public DelegateDisposableToken(Action action)
         {
-            Contract.Requires<ArgumentNullException>(action != null, "action");
+            if (action == null) throw new ArgumentNullException(nameof(action));
 
             _action = action;
         }

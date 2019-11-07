@@ -28,7 +28,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 
@@ -52,7 +51,7 @@ namespace Interlook.Collections
 
 		#region Fields
 
-		private IDictionary<TKey, TValue> internalDictionary;
+		private IDictionary<TKey, TValue> _internalDictionary;
 
 		#endregion Fields
 
@@ -60,7 +59,7 @@ namespace Interlook.Collections
 
 		protected IDictionary<TKey, TValue> Dictionary
 		{
-			get { return internalDictionary; }
+			get { return _internalDictionary; }
 		}
 
 		#endregion Properties
@@ -69,7 +68,7 @@ namespace Interlook.Collections
 
 		public ObservableDictionary()
 		{
-			internalDictionary = new Dictionary<TKey, TValue>();
+			_internalDictionary = new Dictionary<TKey, TValue>();
 		}
 
 		public ObservableDictionary(IDictionary<TKey, TValue> dictionary)
@@ -79,12 +78,12 @@ namespace Interlook.Collections
 
 		public ObservableDictionary(IEqualityComparer<TKey> comparer)
 		{
-			internalDictionary = new Dictionary<TKey, TValue>(comparer);
+			_internalDictionary = new Dictionary<TKey, TValue>(comparer);
 		}
 
 		public ObservableDictionary(int capacity)
 		{
-			internalDictionary = new Dictionary<TKey, TValue>(capacity);
+			_internalDictionary = new Dictionary<TKey, TValue>(capacity);
 		}
 
 		public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
@@ -94,7 +93,7 @@ namespace Interlook.Collections
 
 		public ObservableDictionary(int capacity, IEqualityComparer<TKey> comparer)
 		{
-			internalDictionary = new Dictionary<TKey, TValue>(capacity, comparer);
+			_internalDictionary = new Dictionary<TKey, TValue>(capacity, comparer);
 		}
 
 		#endregion Constructors
@@ -383,7 +382,7 @@ namespace Interlook.Collections
 				}
 				else
 				{
-					internalDictionary = new Dictionary<TKey, TValue>(items);
+					_internalDictionary = new Dictionary<TKey, TValue>(items);
 				}
 
 				onCollectionAdd(NotifyCollectionChangedAction.Add, items.ToArray());

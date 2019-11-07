@@ -390,21 +390,5 @@ namespace Interlook.Security
         {
             return encryptBytesToBytesAES(encoding.GetBytes(plainText), key, iv);
         }
-
-        private static bool isStringNothing(string str)
-        {
-            if (!string.IsNullOrEmpty(str))
-            {
-                if (!string.IsNullOrWhiteSpace(str))
-                {
-                    if (str.Trim().Length > 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
     }
 }

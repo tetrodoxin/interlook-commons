@@ -25,7 +25,6 @@
 #endregion 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 
@@ -49,8 +48,8 @@ namespace Interlook.Components
         public ConcreteDelegateComparer(Func<T, T, bool> equalsFunc, Func<T, int> hashFunc)
             : base(equalsFunc, hashFunc)
         {
-            Contract.Requires<ArgumentNullException>(hashFunc != null, "hashFunc");
-            Contract.Requires<ArgumentNullException>(equalsFunc != null, "equalsFunc");
+            if (equalsFunc == null) throw new ArgumentNullException(nameof(equalsFunc));
+            if (hashFunc == null) throw new ArgumentNullException(nameof(hashFunc));
         }
 
         /// <summary>

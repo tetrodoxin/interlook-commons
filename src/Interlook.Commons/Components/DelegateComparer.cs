@@ -25,9 +25,6 @@
 #endregion 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
 
 namespace Interlook.Components
 {
@@ -38,8 +35,8 @@ namespace Interlook.Components
     /// <typeparam name="T">Type of the objects, that are to be compared.</typeparam>
     public class DelegateComparer<T> : IEqualityComparer<T>
     {
-        private Func<T, int> hashFunc;
-        private Func<T, T, bool> equalsFunc;
+        private Func<T, int> _hashFunc;
+        private Func<T, T, bool> _equalsFunc;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DelegateComparer{T}"/> class.
@@ -48,11 +45,11 @@ namespace Interlook.Components
         /// <param name="hashFunc">Function, that calculates the hashcode for a <c>T</c> object.</param>
         public DelegateComparer(Func<T, T, bool> equalsFunc, Func<T, int> hashFunc)
         {
-            Contract.Requires<ArgumentNullException>(hashFunc != null, "hashFunc");
-            Contract.Requires<ArgumentNullException>(equalsFunc != null, "equalsFunc");
+            if (equalsFunc == null) throw new ArgumentNullException(nameof(equalsFunc));
+            if (hashFunc == null) throw new ArgumentNullException(nameof(hashFunc));
 
-            this.hashFunc = hashFunc;
-            this.equalsFunc = equalsFunc;
+            _hashFunc = hashFunc;
+            _equalsFunc = equalsFunc;
         }
 
         /// <summary>
@@ -61,7 +58,7 @@ namespace Interlook.Components
         /// <param name="x">The first object.</param>
         /// <param name="y">The object to compare.</param>
         /// <returns><c>true</c>, if the given objects are equal, otherwise <c>false</c>.</returns>
-        public virtual bool Equals(T x, T y) => equalsFunc(x, y);
+        public virtual bool Equals(T x, T y) => _equalsFunc(x, y);
 
         /// <summary>
         /// Returns a hash code for this instance.
@@ -70,6 +67,6 @@ namespace Interlook.Components
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public virtual int GetHashCode(T obj) => hashFunc(obj);
+        public virtual int GetHashCode(T obj) => _hashFunc(obj);
     }
 }

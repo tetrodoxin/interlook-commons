@@ -27,10 +27,7 @@
 using System;
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Interlook.Text
 {
@@ -124,11 +121,19 @@ namespace Interlook.Text
         public static string Ensure(this string str) => str ?? string.Empty;
 
         /// <summary>
+        /// Checks if a string is <c>null</c>, empty or just
+        /// contains whitespace characters.
+        /// </summary>
+        /// <param name="str">String object to check.</param>
+        /// <returns>
+        public static bool IsNothing(this string str) => string.IsNullOrWhiteSpace(str);
+
+        /// <summary>
         /// Indicates whether the string is <c>null</c> or an empty string.
         /// </summary>
         /// <param name="str">The string to test.</param>
         /// <returns><c>true</c> if the given string is <c>null</c> or an empty string. Otherwise <c>false</c>.</returns>
-        public static bool IsNullOrEmpty(this string str) => String.IsNullOrEmpty(str);
+        public static bool IsNullOrEmpty(this string str) => string.IsNullOrEmpty(str);
 
         /// <summary>
         /// Indicates whether the string only contains decimal numbers.
@@ -210,7 +215,7 @@ namespace Interlook.Text
             {
                 if (strict)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(length), "String darf nicht kürzer sein, als geforderte Zeichenzahl.");
+                    throw new ArgumentOutOfRangeException(nameof(length), "String must no be shorter than given length.");
                 }
 
                 return str;
@@ -239,6 +244,18 @@ namespace Interlook.Text
             {
                 return str.Substring(0, maxLength);
             }
+        }
+
+        /// <summary>
+        /// Checks if a string matches a regular expression.
+        /// </summary>
+        /// <param name="value">The string value to check.</param>
+        /// <param name="pattern">The regular expression pattern for checking.</param>
+        public static bool MatchesRegEx(this string value, string pattern)
+        {
+            if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+
+            return System.Text.RegularExpressions.Regex.IsMatch(value ?? string.Empty, pattern);
         }
 
         /// <summary>
@@ -293,7 +310,7 @@ namespace Interlook.Text
         /// </returns>
         public static string Otherwise(this string str, Func<string, bool> predicate, string alternativeString)
         {
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
             if (predicate(str))
             {
@@ -319,15 +336,7 @@ namespace Interlook.Text
             }
             else
             {
-                double result;
-                if (!double.TryParse(str.Trim(), out result))
-                {
-                    return 0.0;
-                }
-                else
-                {
-                    return result;
-                }
+                return double.TryParse(str.Trim(), out double result) ? result : 0.0;
             }
         }
 
@@ -345,15 +354,7 @@ namespace Interlook.Text
             }
             else
             {
-                int result;
-                if (!int.TryParse(str.Trim(), out result))
-                {
-                    return 0;
-                }
-                else
-                {
-                    return result;
-                }
+                return int.TryParse(str.Trim(), out int result) ? result : 0;
             }
         }
 
@@ -371,15 +372,7 @@ namespace Interlook.Text
             }
             else
             {
-                long result;
-                if (!long.TryParse(str.Trim(), out result))
-                {
-                    return 0;
-                }
-                else
-                {
-                    return result;
-                }
+                return long.TryParse(str.Trim(), out long result) ? result : 0;
             }
         }
 
@@ -397,15 +390,7 @@ namespace Interlook.Text
             }
             else
             {
-                short result;
-                if (!short.TryParse(str.Trim(), out result))
-                {
-                    return 0;
-                }
-                else
-                {
-                    return result;
-                }
+                return short.TryParse(str.Trim(), out short result) ? result : (short)0;
             }
         }
 
@@ -423,15 +408,7 @@ namespace Interlook.Text
             }
             else
             {
-                TimeSpan result;
-                if (TimeSpan.TryParse(str, out result))
-                {
-                    return result;
-                }
-                else
-                {
-                    return TimeSpan.FromSeconds(0);
-                }
+                return TimeSpan.TryParse(str, out TimeSpan result) ? result : TimeSpan.FromSeconds(0);
             }
         }
 
@@ -470,7 +447,7 @@ namespace Interlook.Text
             {
                 if (strict)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(length), "String darf nicht kürzer sein, als geforderte Zeichenzahl.");
+                    throw new ArgumentOutOfRangeException(nameof(length), "String must not be shorter than given length.");
                 }
 
                 return str;
@@ -492,28 +469,36 @@ namespace Interlook.Text
 
         /// <summary>
         /// Compares an array of characters to another, by trying to achieve an almost constant time,
-        /// to prevent side channel attacks (timing attacks)
+        /// to mitigate side channel attacks (timing attacks)
         /// </summary>
         /// <param name="str">The original characters.</param>
         /// <param name="candidate">The char array to compare.</param>
         /// <returns><c>true</c> if the two arrays match exactly (so even case sensitive), otherwise <c>false</c></returns>
         public static bool SecureEquals(this char[] original, char[] candidate)
         {
-            var jessas = Math.Min(original.Length, candidate.Length);
-            var rest = candidate.Length - jessas;
+            int result = 0;
+            int origPos = 0;
+            int candPos = 0;
+            int dummy = 0;
 
-            int result2 = original.Length ^ candidate.Length;
-            for (int i = 0; i < jessas; i++)
+            int origLastPos = original.Length - 1;
+            int candLastPos = candidate.Length - 1;
+
+            if (original == null || candidate == null) return false;
+
+            while (true)
             {
-                result2 |= (original[i] ^ candidate[i]);
+                result |= original[origPos] ^ candidate[candPos];
+
+                if (origPos == origLastPos) break;
+
+                origPos++;
+
+                if (candPos != candLastPos) candPos++;
+                if (candPos == candLastPos) dummy++;
             }
 
-            for (int i = 0; i < rest; i++)
-            {
-                result2 |= (original[i] ^ candidate[i]);
-            }
-
-            return result2 == 0;
+            return result == 0;
         }
 
         /// <summary>
@@ -540,16 +525,6 @@ namespace Interlook.Text
         /// <param name="str">The string object to trim safely (may be null).</param>
         /// <returns>A trimmed copy of the provided string or an empty string, if the parameter string was <c>null</c>.
         /// Is never <c>null</c></returns>
-        public static string TrimProtected(this string str)
-        {
-            if (!string.IsNullOrEmpty(str))
-            {
-                return str.Trim();
-            }
-            else
-            {
-                return str;
-            }
-        }
+        public static string TrimProtected(this string str) => string.IsNullOrEmpty(str) ? str : str.Trim();
     }
 }
