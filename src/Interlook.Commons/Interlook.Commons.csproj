@@ -4,7 +4,7 @@
     <TargetFrameworks>net451;netcoreapp2.2</TargetFrameworks>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <FileVersion>1.2.0.0</FileVersion>
-    <Version>1.1.5</Version>
+    <Version>1.2.0</Version>
     <Company>Andreas H.</Company>
     <Description>Another library of daily basis tools, one could wish to be included in .NET</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

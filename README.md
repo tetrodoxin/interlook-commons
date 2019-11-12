@@ -29,7 +29,8 @@ It contains:
   - `FunctionalExtensions` - extension methods for currying and partial applying functions/actions
   - `DictionaryExtensions` - helper methods for generic dictionaries (e.g. getting values safely)
   - `EnumerationExtensions` - helper methods for enumerators and Linq2Objects
-  - Classical monads from FP, namely `Maybe`,`Either` and `Try` as well as their lazy versions `MaybeLazy`,`EitherLazy` and `TryLazy`. Notice, that the lazy types are often the counterparts of the native pendants in functional languages (Haskell, F# etc.)
+  - Classical monads from FP, namely `Maybe`,`Either`,`Try` as well as their lazy versions `MaybeLazy`,`EitherLazy` and `TryLazy`. Notice, that the lazy types are often the counterparts of the native pendants in functional languages (Haskell, F# etc.).
+  - Additionally: `Reader`, `Writer` and `State`, which are lazy by default.
 - String and text handling
   - checking and comparing string
   - constraining strings
