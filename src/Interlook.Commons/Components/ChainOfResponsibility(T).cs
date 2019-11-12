@@ -37,15 +37,15 @@ namespace Interlook.Components
     /// that it has processed the item.
     /// Handlers can optionally be added with priorities, but not placed
     /// in a certain position in the chain.
-    /// </ summary>
-    /// <typeparam name = "TItem">Data type to be processed</ typeparam>
+    /// </summary>
+    /// <typeparam name = "TItem">Data type to be processed</typeparam>
     public class ChainOfResponsibility<TItem>
     {
         private Dictionary<ChainOfResponsibilityHandler<TItem>, Priority> _handlers = new Dictionary<ChainOfResponsibilityHandler<TItem>, Priority>();
 
         /// <summary>
         /// Specifies how to handle exceptions in handlers when processing.
-        /// </ summary>
+        /// </summary>
         public ExceptionHandling ExceptionHandling { get; set; }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Interlook.Components
 
         /// <summary>
         /// Adds an processor (handler) to the chain.
-        /// </ summary>
-        /// <param name = "handler"> The handler to be added. </ param>
+        /// </summary>
+        /// <param name = "handler"> The handler to be added. </param>
         public void AddHandler(ChainOfResponsibilityHandler<TItem> handler)
         {
             if (handler == null) throw new ArgumentNullException(nameof(handler));
@@ -81,9 +81,9 @@ namespace Interlook.Components
 
         /// <summary>
         /// Passes an item to the chain for processing.
-        /// </ summary>
-        /// <param name = "itemToProcess"> The item to process. </ param>
-        /// <returns> <c> true </ c> if the item has been processed, otherwise <c> false </ c>. </ returns>
+        /// </summary>
+        /// <param name = "itemToProcess"> The item to process. </param>
+        /// <returns> <c> true </c> if the item has been processed, otherwise <c> false </c>. </returns>
         public bool Process(TItem itemToProcess)
         {
             var handlers = _handlers.OrderByDescending(p => p.Value)
@@ -119,15 +119,15 @@ namespace Interlook.Components
     /// <summary>
     /// Handler/Processor for a Chain-Of-Responsibility.
     /// Returns <c> true </c> if it was responsible for processing.
-    /// </ summary>
-    /// <typeparam name = "TItem"> Data type of the item to be processed. </ typeparam>
-    /// <param name = "item"> The item to process. </ param>
-    /// <returns> <c> true </ c> if the item has been processed and the chain can be terminated. </ returns>
+    /// </summary>
+    /// <typeparam name = "TItem"> Data type of the item to be processed. </typeparam>
+    /// <param name = "item"> The item to process. </param>
+    /// <returns> <c> true </c> if the item has been processed and the chain can be terminated. </returns>
     public delegate bool ChainOfResponsibilityHandler<TItem>(TItem item);
 
     /// <summary>
     /// Enumeration of modes for dealing with exceptions in handlers
-    /// </ summary>
+    /// </summary>
     public enum ExceptionHandling
     {
         /// <summary>
@@ -148,7 +148,7 @@ namespace Interlook.Components
 
     /// <summary>
     /// Enumeration of processing priorities
-    /// </ summary>
+    /// </summary>
     public enum Priority
     {
         /// <summary>

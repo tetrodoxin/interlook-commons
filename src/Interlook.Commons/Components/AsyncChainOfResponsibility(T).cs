@@ -36,8 +36,8 @@ namespace Interlook.Components
     /// that it has processed the item.
     /// Handlers can optionally be added with priorities, but not placed
     /// in a certain position in the chain.
-    /// </ summary>
-    /// <typeparam name = "TItem">Data type to be processed</ typeparam>
+    /// </summary>
+    /// <typeparam name = "TItem">Data type to be processed</typeparam>
     public class AsyncChainOfResponsibility<TItem>
     {
         private Dictionary<AsyncChainOfResponsibilityHandler<TItem>, Priority> _handlers
@@ -145,9 +145,9 @@ namespace Interlook.Components
     /// <summary>
     /// Async Handler/Processor for a Chain-Of-Responsibility.
     /// Returns <c>true</c> if it was responsible for processing.
-    /// </ summary>
-    /// <typeparam name = "TItem"> Data type of the item to be processed. </ typeparam>
-    /// <param name = "item"> The item to process. </ param>
-    /// <returns> <c> true </ c> if the item has been processed and the chain can be terminated. </ returns>
+    /// </summary>
+    /// <typeparam name = "TItem"> Data type of the item to be processed. </typeparam>
+    /// <param name = "item"> The item to process. </param>
+    /// <returns> <c> true </c> if the item has been processed and the chain can be terminated. </returns>
     public delegate Task<bool> AsyncChainOfResponsibilityHandler<TItem>(TItem item);
 }

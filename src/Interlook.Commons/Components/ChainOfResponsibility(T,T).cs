@@ -36,7 +36,7 @@ namespace Interlook.Components
     /// </summary>
     /// <typeparam name = "TItem">The type of the item.</typeparam>
     /// <typeparam name = "TResult">The type of the result.</typeparam>
-    /// <param name = "item">The item to process.</ param>
+    /// <param name = "item">The item to process.</param>
     /// <returns>
     /// A <see cref = "MethodResult{T}"/> which contains the status of the processing
     /// in the <c>ReturnCode</c> (responsible, not responsible) and possibly the result in <c> Result </c>.
@@ -73,8 +73,8 @@ namespace Interlook.Components
         /// <summary>
         /// Adds an processor (handler) to the chain.
         /// </summary>
-        /// <param name = "handler"> The handler to be added. </ param>
-        /// <param name = "priority"> The priority of the handler to add. </ param>
+        /// <param name = "handler"> The handler to be added. </param>
+        /// <param name = "priority"> The priority of the handler to add. </param>
         public void AddHandler(ChainOfResponsibilityResultHandler<TItem, TResult> handler, Priority priority)
         {
             if (handler == null) throw new ArgumentNullException(nameof(handler));
@@ -96,8 +96,8 @@ namespace Interlook.Components
         /// <summary>
         /// Passes an item to the chain for processing.
         /// </summary>
-        /// <param name = "itemToProcess"> The item to process. </ param>
-        /// <returns> The result object or <c> default (TResult) </ c> if no handler was responsible. </ returns>
+        /// <param name = "itemToProcess"> The item to process. </param>
+        /// <returns> The result object or <c> default (TResult) </c> if no handler was responsible. </returns>
         public TResult Process(TItem itemToProcess)
         {
             var handlers = _handlers.OrderByDescending(p => p.Value)

@@ -153,7 +153,7 @@ namespace Interlook.Functional
         /// <returns>The curry function.</returns>
         /// <example>
         /// // principle of currying in C# functions
-        /// Func<int, int, int> f = (x, y, n) => (x + y) * n;
+        /// Func&lt;int, int, int&gt; f = (x, y, n) => (x + y) * n;
         /// var curried = f.Curry();
         /// 
         /// var result1 = f(3, 2, 4);       // returns 20
@@ -175,7 +175,7 @@ namespace Interlook.Functional
         /// <returns>The curry function.</returns>
         /// <example>
         /// // principle of currying in C# functions
-        /// Func<int, int, int> f = (x, y, n) => (x + y) * n;
+        /// Func&lt;int, int, int&gt; f = (x, y, n) => (x + y) * n;
         /// var curried = f.Curry();
         /// 
         /// var result1 = f(3, 2, 4);       // returns 20
@@ -198,7 +198,7 @@ namespace Interlook.Functional
         /// <returns>The curry function.</returns>
         /// <example>
         /// // principle of currying in C# functions
-        /// Func<int, int, int> f = (x, y, n) => (x + y) * n;
+        /// Func&lt;int, int, int&gt; f = (x, y, n) => (x + y) * n;
         /// var curried = f.Curry();
         /// 
         /// var result1 = f(3, 2, 4);       // returns 20
@@ -222,7 +222,7 @@ namespace Interlook.Functional
         /// <returns>The curry function.</returns>
         /// <example>
         /// // principle of currying in C# functions
-        /// Func<int, int, int> f = (x, y, n) => (x + y) * n;
+        /// Func&lt;int, int, int&gt; f = (x, y, n) => (x + y) * n;
         /// var curried = f.Curry();
         /// 
         /// var result1 = f(3, 2, 4);       // returns 20

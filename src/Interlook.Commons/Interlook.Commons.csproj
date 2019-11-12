@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451;netcoreapp2.2</TargetFrameworks>
-    <AssemblyVersion>1.1.5.0</AssemblyVersion>
-    <FileVersion>1.1.5.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <Version>1.1.5</Version>
     <Company>Andreas H.</Company>
     <Description>Another library of daily basis tools, one could wish to be included in .NET</Description>
@@ -18,6 +18,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <DocumentationFile>C:\Users\huebnera\git_repos\Externe\interlook.commons\src\Interlook.Commons\Interlook.Commons.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>  
   
   <ItemGroup>

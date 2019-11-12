@@ -36,7 +36,12 @@ namespace Interlook.Monads
     /// <typeparam name="T">Type of the encapsulated value.</typeparam>
     public abstract class Maybe<T>
     {
-        protected internal abstract Maybe<TResult> DoBind<TResult>(Func<T, Maybe<TResult>> func);
+        /// <summary>
+        /// Binds, in overriding classes, a function to the instance.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="func">The function to bind.</param>
+        protected internal abstract Maybe<TResult> BindInternal<TResult>(Func<T, Maybe<TResult>> func);
     }
 
     /// <summary>
@@ -68,9 +73,22 @@ namespace Interlook.Monads
         /// <returns></returns>
         public override int GetHashCode() => 0;
 
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
         public override bool Equals(object obj) => obj is Nothing<T>;
 
-        protected internal override Maybe<TResult> DoBind<TResult>(Func<T, Maybe<TResult>> func) => new Nothing<TResult>();
+        /// <summary>
+        /// Does not actually bind the function, since the maybe object is nothing.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="func">The function to bind.</param>
+        /// <returns></returns>
+        protected internal override Maybe<TResult> BindInternal<TResult>(Func<T, Maybe<TResult>> func) => new Nothing<TResult>();
     }
 
     /// <summary>
@@ -79,7 +97,7 @@ namespace Interlook.Monads
     /// <typeparam name="T">Type of the value.</typeparam>
     public class Just<T> : Maybe<T>
     {
-        protected const string NULL_AS_STRING = "null";
+        private const string NullAsString = "null";
 
         private bool _isNull;
         private int _hash;
@@ -106,10 +124,29 @@ namespace Interlook.Monads
             _implementsEquatable = typeof(IEquatable<T>).IsAssignableFrom(typeof(T));
         }
 
-        public override string ToString() => _isNull ? NULL_AS_STRING : Value.ToString();
+        /// <summary>
+        /// Converts the encapsulated value to a string.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="string" /> that represents this instance.
+        /// </returns>
+        public override string ToString() => _isNull ? NullAsString : Value.ToString();
 
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
         public override int GetHashCode() => _hash;
 
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
         public override bool Equals(object obj) => Equals(this, obj as Just<T>);
 
         /// <summary>
@@ -148,7 +185,13 @@ namespace Interlook.Monads
             }
         }
 
-        protected internal override Maybe<TResult> DoBind<TResult>(Func<T, Maybe<TResult>> func) => func(Value);
+        /// <summary>
+        /// Binds a function to the maybe instance.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="func">The function to bind.</param>
+        /// <returns>The result of the <paramref name="func"/></returns>
+        protected internal override Maybe<TResult> BindInternal<TResult>(Func<T, Maybe<TResult>> func) => func(Value);
     }
 
     /// <summary>
@@ -168,17 +211,18 @@ namespace Interlook.Monads
         }
 
         /// <summary>
-        /// Puts a value into a strict maybe monad. (see <see cref="Maybe{T}"/>)
-        /// and uses a filter function for distiction (<see cref="Just{T}"/> vs. <see cref="Nothing{T}"/> ).
+        /// Puts a value into a strict maybe monad. (see <see cref="Maybe{T}" />)
+        /// and uses a filter function for distiction (<see cref="Just{T}" /> vs. <see cref="Nothing{T}" /> ).
         /// </summary>
         /// <typeparam name="T">The type of the maybe-object.</typeparam>
         /// <param name="value">The object/value to be wrapped in a maybe-object.</param>
         /// <param name="predicate">The  (filter) function to decide, if the
-        /// object is wrapped into <see cref="Nothing{T}"/> or <see cref="Just{T}"/>.</param>
+        /// object is wrapped into <see cref="Nothing{T}" /> or <see cref="Just{T}" />.</param>
         /// <returns>
-        ///   <returns>A <see cref="Just{T}"/> instance, if the predicate function returned <c>true</c>,
-        /// otherwise a <see cref="Nothing{T}"/> object.</returns>
+        /// <returns>A <see cref="Just{T}" /> instance, if the predicate function returned <c>true</c>,
+        /// otherwise a <see cref="Nothing{T}" /> object.</returns>
         /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> was <c>null</c>.</exception>
         public static Maybe<T> ToMaybe<T>(this T value, Func<T, bool> predicate)
         {
             if (predicate == null) throw new ArgumentNullException(nameof(predicate));
@@ -204,27 +248,33 @@ namespace Interlook.Monads
         /// <typeparam name="A"></typeparam>
         /// <typeparam name="B"></typeparam>
         /// <typeparam name="C"></typeparam>
-        /// <param name="a">The maybe aggregate.</param>
-        /// <param name="func">The function to bind.</param>
+        /// <param name="obj">The maybe aggregate.</param>
+        /// <param name="collector">The function to bind.</param>
         /// <param name="select">The result flattening selector.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="obj"/>, <paramref name="collector"/> or <paramref name="select"/> was <c>null</c>;
+        /// </exception>
         /// <remarks>
         /// Multiple disjunct FROMs means:
-        ///		the notation
-        ///		<code>
-        ///			from a in s1
-        ///			from b in s2
-        ///			select a + b
-        ///		</code>
-        ///
-        ///		is tanslated to:
-        ///		<code>
-        ///			s1.SelectMany(x => s2, (a, b) => a + b)
-        ///		</code>
+        /// the notation
+        /// <code>
+        /// from a in s1
+        /// from b in s2
+        /// select a + b
+        /// </code>
+        /// is tanslated to:
+        /// <code>
+        /// s1.SelectMany(x =&gt; s2, (a, b) =&gt; a + b)
+        /// </code>
         /// </remarks>
-        public static Maybe<C> SelectMany<A, B, C>(this Maybe<A> a, Func<A, Maybe<B>> func, Func<A, B, C> select)
+        public static Maybe<C> SelectMany<A, B, C>(this Maybe<A> obj, Func<A, Maybe<B>> collector, Func<A, B, C> select)
         {
-            return Bind(a, aValue => Bind(func(aValue), funcValue => select(aValue, funcValue).ToMaybe()));
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (collector == null) throw new ArgumentNullException(nameof(collector));
+            if (select == null) throw new ArgumentNullException(nameof(select));
+
+            return Bind(obj, aValue => Bind(collector(aValue), funcValue => select(aValue, funcValue).ToMaybe()));
         }
 
         /// <summary>
@@ -235,8 +285,10 @@ namespace Interlook.Monads
         /// <param name="query">The query (predicate) for keeping the maybe,
         /// rather than returning Nothing[T].</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="query"/> was <c>null</c>.</exception>
         public static Maybe<T> Where<T>(this Maybe<T> obj, Func<T, bool> query)
         {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
             if (query == null) throw new ArgumentNullException(nameof(query));
 
             return obj is Just<T> justa && query(justa.Value) ? justa : (Maybe<T>)new Nothing<T>();
@@ -255,12 +307,13 @@ namespace Interlook.Monads
         /// <returns>Result of the selector function, that has been encapsulated into a <see cref="Just{T}"/>-
         /// or a <see cref="Nothing{T}"/>-object. The latter one applies, if the provided maybe monad
         /// was already Nothing.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="selector"/> was <c>null</c>.</exception>
         public static Maybe<TResult> Select<TSource, TResult>(this Maybe<TSource> obj, Func<TSource, TResult> selector)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
             if (selector == null) throw new ArgumentNullException(nameof(selector));
 
-            return obj.DoBind(p => new Just<TResult>(selector(p)));
+            return obj.BindInternal(p => new Just<TResult>(selector(p)));
         }
 
         /// <summary>
@@ -271,12 +324,13 @@ namespace Interlook.Monads
         /// <param name="obj">The maybe monad.</param>
         /// <param name="functionToBind">The function to bind.</param>
         /// <returns>The resulting aggregate (maybe object) after binding the function to the given aggregate.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="functionToBind"/> was <c>null</c>.</exception>
         public static Maybe<TResult> Bind<TSource, TResult>(this Maybe<TSource> obj, Func<TSource, Maybe<TResult>> functionToBind)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
             if (functionToBind == null) throw new ArgumentNullException(nameof(functionToBind));
 
-            return obj.DoBind(functionToBind);
+            return obj.BindInternal(functionToBind);
         }
 
         /// <summary>
@@ -290,6 +344,7 @@ namespace Interlook.Monads
         /// This method may cause side effects using the aggregate value and
         /// does not change the aggregate itself.
         /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="actionToApply"/> was <c>null</c>.</exception>
         public static Maybe<T> Apply<T>(this Maybe<T> obj, Action<T> actionToApply)
         {
             if (obj == null)
@@ -321,10 +376,11 @@ namespace Interlook.Monads
         /// This method may cause side effects using the aggregate value and
         /// does not change the aggregate itself.
         /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/>,
+        /// <paramref name="predicate"/> or <paramref name="actionToApply"/> was <c>null</c>.</exception>
         public static Maybe<T> Apply<T>(this Maybe<T> obj, Action<T> actionToApply, Func<T, bool> predicate)
         {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
 
             if (actionToApply == null)
                 throw new ArgumentNullException(nameof(actionToApply));
@@ -346,7 +402,13 @@ namespace Interlook.Monads
         /// <typeparam name="T">The type of the object-type</typeparam>
         /// <param name="obj">The maybe-object to check.</param>
         /// <returns><c>true</c>, if the maybe-object contains a value. <seealso cref="Just{T}"/></returns>
-        public static bool HasValue<T>(this Maybe<T> obj) => obj is Just<T>;
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> was <c>null</c>.</exception>
+        public static bool HasValue<T>(this Maybe<T> obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+            return obj is Just<T>;
+        }
 
         /// <summary>
         /// Determines whether the specified maybe-object has no value.
@@ -359,7 +421,13 @@ namespace Interlook.Monads
         /// This method also returns <c>true</c>, if a maybe's value is <c>null</c>,
         /// since this is a valid value for objects.
         /// </remarks>
-        public static bool IsNothing<T>(this Maybe<T> obj) => obj is Nothing<T>;
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> was <c>null</c>.</exception>
+        public static bool IsNothing<T>(this Maybe<T> obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+            return obj is Nothing<T>;
+        }
 
         /// <summary>
         /// Gets the value of the maybe-object.
@@ -368,7 +436,13 @@ namespace Interlook.Monads
         /// <param name="obj">The maybe-object.</param>
         /// <param name="defaultValue">The default value to return, if the maybe object contains no value.</param>
         /// <returns>The value of the maybe-object, if existing, or the given default value otherwise.</returns>
-        public static T GetValue<T>(this Maybe<T> obj, T defaultValue) => obj is Just<T> just ? just.Value : defaultValue;
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> was <c>null</c>.</exception>
+        public static T GetValue<T>(this Maybe<T> obj, T defaultValue)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+            return obj is Just<T> just ? just.Value : defaultValue;
+        }
 
         /// <summary>
         /// Returns another maybe-object, if the maybe-object is empty (<see cref="Nothing{T}"/>)
@@ -377,6 +451,7 @@ namespace Interlook.Monads
         /// <param name="obj">The maybe-object.</param>
         /// <param name="defaultMaybe">The default maybe-object, if the given maybe-object is empty.</param>
         /// <returns>The original maybe-object, if it contains a value; otherwise the given default maybe-object.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="defaultMaybe"/> was <c>null</c>.</exception>
         public static Maybe<T> Otherwise<T>(this Maybe<T> obj, Maybe<T> defaultMaybe)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
@@ -392,6 +467,7 @@ namespace Interlook.Monads
         /// <param name="obj">The maybe-object.</param>
         /// <param name="exceptionToThrow">The exception to throw.</param>
         /// <returns>The original maybe-aggregate, if it contains a value</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="exceptionToThrow"/> was <c>null</c>.</exception>
         public static Maybe<T> OtherwiseThrow<T>(this Maybe<T> obj, Exception exceptionToThrow)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
@@ -417,6 +493,7 @@ namespace Interlook.Monads
         /// A maybe-object, containing the boolean result of the given predicate, if the maybe-object contains a value;
         /// otherwise an empty maybe-value.
         /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="predicate"/> was <c>null</c>.</exception>
         public static Maybe<bool> Satisfies<T>(this Maybe<T> obj, Func<T, bool> predicate)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
@@ -435,6 +512,7 @@ namespace Interlook.Monads
         /// <param name="source">The source enumerator.</param>
         /// <param name="selector">The result selector function.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="selector"/> was <c>null</c>.</exception>
         public static IEnumerable<TResult> MapMaybe<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, Maybe<TResult>> selector)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -452,6 +530,7 @@ namespace Interlook.Monads
         /// <typeparam name="T">The encapsulated data type.</typeparam>
         /// <param name="obj">The maybe instance.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> was <c>null</c>.</exception>
         public static IEnumerable<T> MaybeToList<T>(this Maybe<T> obj)
         {
             if (obj == null)
@@ -468,6 +547,7 @@ namespace Interlook.Monads
         /// <typeparam name="T">Data type, encapsulated by the maybe-monad in the source enumerator.</typeparam>
         /// <param name="source">The source enumerator.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was <c>null</c>.</exception>
         public static IEnumerable<T> CatMaybes<T>(this IEnumerable<Maybe<T>> source)
         {
             if (source == null)
@@ -484,6 +564,7 @@ namespace Interlook.Monads
         /// <typeparam name="T">Data type, encapsulated by the maybe-monad in the source enumerator.</typeparam>
         /// <param name="source">The source enumerator.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was <c>null</c>.</exception>
         public static Maybe<T> FirstToMaybe<T>(this IEnumerable<T> source)
         {
             if (source == null)
@@ -501,6 +582,7 @@ namespace Interlook.Monads
         /// <param name="source">The source enumerator.</param>
         /// <param name="predicate">The filter criterion.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="predicate"/> was <c>null</c>.</exception>
         public static Maybe<T> FirstToMaybe<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {
             if (source == null)

@@ -36,8 +36,8 @@ namespace Interlook.Components
     /// that it has processed the item.
     /// Handlers can optionally be added with priorities, but not placed
     /// in a certain position in the chain.
-    /// </ summary>
-    /// <typeparam name = "TItem">Data type to be processed</ typeparam>
+    /// </summary>
+    /// <typeparam name = "TItem">Data type to be processed</typeparam>
     /// <typeparam name="TResult">Data type of the handlers' result.</typeparam>
     public class AsyncChainOfResponsibility<TItem, TResult>
     {
@@ -151,7 +151,7 @@ namespace Interlook.Components
     /// </summary>
     /// <typeparam name = "TItem">The type of the item.</typeparam>
     /// <typeparam name = "TResult">The type of the result.</typeparam>
-    /// <param name = "item">The item to process.</ param>
+    /// <param name = "item">The item to process.</param>
     /// <returns>
     /// A <see cref = "MethodResult{T}"/> which contains the status of the processing
     /// in the <c>ReturnCode</c> (responsible, not responsible) and possibly the result in <c> Result </c>.

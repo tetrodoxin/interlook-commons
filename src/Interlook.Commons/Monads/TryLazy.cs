@@ -174,6 +174,74 @@ namespace Interlook.Monads
         }
 
         /// <summary>
+        /// Binds the specified function to the try monad.
+        /// The resulting instance depends to the return value
+        /// of <paramref name="func"/> and if the function
+        /// threw an exception, which would result in an <see cref="Failure{TResult}"/> instance.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the source.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="obj">A <see cref="Try{TSource}"/> monad.</param>
+        /// <param name="func">The function to bind.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="obj"/> or <paramref name="func"/> was null.
+        /// </exception>
+        public static TryLazy<TResult> Bind<TSource, TResult>(this TryLazy<TSource> obj, Func<TSource, Try<TResult>> func)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (func == null) throw new ArgumentNullException(nameof(func));
+
+            return () => obj.Invoke().BindInternal(func);
+        }
+
+
+        /// <summary>
+        /// Binds the specified function to the try monad.
+        /// The resulting instance depends to the return value
+        /// of <paramref name="func"/> and if the function
+        /// threw an exception, which would result in an <see cref="Failure{TResult}"/> instance.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the source.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="obj">A <see cref="Try{TSource}"/> monad.</param>
+        /// <param name="func">The function to bind.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="obj"/> or <paramref name="func"/> was null.
+        /// </exception>
+        public static TryLazy<TResult> Bind<TSource, TResult>(this TryLazy<TSource> obj, Func<TSource, TryLazy<TResult>> func)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (func == null) throw new ArgumentNullException(nameof(func));
+
+            return () => obj.Invoke().BindInternal(p => func(p)());
+        }
+
+
+        /// <summary>
+        /// Evaluates the try monad with one of two given mapping functions
+        /// depending on the state of the try.
+        /// </summary>
+        /// <typeparam name="TSource">Type of the result of <paramref name="obj"/>.</typeparam>
+        /// <typeparam name="TResult">Type of the result.</typeparam>
+        /// <param name="obj">A try monad.</param>
+        /// <param name="successFunc">Function to be used for <see cref="Success{TResult}"/> instances.</param>
+        /// <param name="failureFunc">Function to be used for <see cref="Failure{TResult}"/> instances.</param>
+        /// <returns>The result of one of the specified functions, that was accordingly applied.</returns>
+        public static TResult MapTry<TSource, TResult>(this TryLazy<TSource> obj, Func<TSource, TResult> successFunc, Func<object, TResult> failureFunc)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (successFunc == null) throw new ArgumentNullException(nameof(successFunc));
+            if (failureFunc == null) throw new ArgumentNullException(nameof(failureFunc));
+
+            var result = obj.Invoke();
+
+            return (result is Success<TSource> succ) ? successFunc(succ.Value) : failureFunc(((Failure<TSource>)result).Error);
+        }
+
+
+        /// <summary>
         /// Similar to <see cref="SelectMany{T1, T2, TResult}(TryLazy{T1}, Func{T1, TryLazy{T2}}, Func{T1, T2, TResult})"/>.
         /// Safely invokes the method calls of the current and the provided monad (in that order)
         /// and provides the return values of both to a combiner function. The result of

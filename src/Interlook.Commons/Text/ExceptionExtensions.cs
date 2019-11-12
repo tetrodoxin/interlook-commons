@@ -51,6 +51,7 @@ namespace Interlook.Text
         /// including nested inner exceptions up to an given maximum depth.
         /// </summary>
         /// <param name="ex">The exception.</param>
+        /// <param name="maxDepth">The maximum depth.</param>
         /// <returns></returns>
         public static string ToCompleteString(this Exception ex, int maxDepth) => exceptionString(ex, new List<Exception>(), 0, maxDepth);
 

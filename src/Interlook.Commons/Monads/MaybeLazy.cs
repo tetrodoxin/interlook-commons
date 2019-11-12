@@ -52,7 +52,7 @@ namespace Interlook.Monads
     /// Following code is ineffective:
     ///
     /// <code>
-    /// <![CDATA[LazyMaybe<int>]]> m = getSomeLazyMaybe();
+    /// <![CDATA[MaybeLazy<int>]]> m = getSomeLazyMaybe();
     /// // DONT DO THAT
     /// if(m.HasValue())        // Maybe is evaluated
     /// {
@@ -63,7 +63,7 @@ namespace Interlook.Monads
     /// Better:
     ///
     /// <code>
-    /// <![CDATA[LazyMaybe<int>]]> m = getSomeLazyMaybe();
+    /// <![CDATA[MaybeLazy<int>]]> m = getSomeLazyMaybe();
     /// var mb = m();           // returning a strict maybe, that is already evaluated
     /// if(mb.HasValue())
     /// {
@@ -78,22 +78,22 @@ namespace Interlook.Monads
     {
         /// <summary>
         /// Returns a <see cref="MaybeLazy{T}"/> instance, that will
-        /// later result in <see cref="Components.Nothing{T}"/>.
+        /// later result in <see cref="Nothing{T}"/>.
         /// </summary>
         /// <typeparam name="T">Encapsulated data type.</typeparam>
         /// <returns>An instance of <see cref="MaybeLazy{T}"/>,
-        /// that encapsulates no value (see <see cref="Components.Nothing{T}"/></returns>
+        /// that encapsulates no value (see <see cref="Nothing{T}"/></returns>
         public static MaybeLazy<T> Nothing<T>() => () => new Nothing<T>();
 
         /// <summary>
         /// Returns a <see cref="MaybeLazy{T}"/> instance, that will
-        /// later result in <see cref="Components.Nothing{T}"/>.
+        /// later result in <see cref="Nothing{T}"/>.
         /// This overload is syntactical only sugar.
         /// </summary>
         /// <typeparam name="T">Encapsulated data type.</typeparam>
         /// <param name="dummy">Unused dummy value, that is only used for type inference.</param>
         /// <returns>An instance of <see cref="MaybeLazy{T}"/>,
-        /// that encapsulates no value (see <see cref="Components.Nothing{T}"/></returns>
+        /// that encapsulates no value (see <see cref="Nothing{T}"/></returns>
         /// <example>
         /// <code>
         ///     var m = MaybeLazy.NothingLike(1);   // gets us an <![CDATA[Nothing<int>]]>
@@ -104,16 +104,16 @@ namespace Interlook.Monads
 
         /// <summary>
         /// Returns an instance of <see cref="MaybeLazy{T}"/>, that will
-        /// result in <see cref="Components.Just{T}"/> later.
+        /// result in <see cref="Just{T}"/> later.
         /// </summary>
         /// <typeparam name="T">Encapsulated data type.</typeparam>
         /// <returns>An instance of <see cref="MaybeLazy{T}"/>,
-        /// encapsulating the given value (see <see cref="Components.Just{T}"/></returns>
+        /// encapsulating the given value (see <see cref="Just{T}"/></returns>
         public static MaybeLazy<T> Just<T>(T value) => () => new Just<T>(value);
 
         /// <summary>
         /// Returns an instance of <see cref="MaybeLazy{T}"/>, that will
-        /// result in <see cref="Components.Just{T}"/> later, encapsulating
+        /// result in <see cref="Just{T}"/> later, encapsulating
         /// the return value of a function .
         /// </summary>
         /// <typeparam name="T">Encapsulated data type.</typeparam>
@@ -128,7 +128,7 @@ namespace Interlook.Monads
 
         /// <summary>
         /// Returns an instance of <see cref="MaybeLazy{T}"/>, that will
-        /// result in <see cref="Components.Just{T}" /> or <see cref="Components.Nothing{T}" />,
+        /// result in <see cref="Just{T}" /> or <see cref="Nothing{T}" />,
         /// depending on whether the return value of the given function matches
         /// the filter criterion, defined by the provided predicate function.
         /// </summary>
@@ -224,7 +224,7 @@ namespace Interlook.Monads
         /// <typeparam name="T1">Gekapselter Datentyp des 1. Maybe-Aggregats</typeparam>
         /// <typeparam name="T2">Gekapselter Datentyp des 2. Maybe-Aggregats</typeparam>
         /// <typeparam name="TResult">Gekapselter Datentyp des Ergebnis-Maybe-Aggregats</typeparam>
-        /// <param name="a">The maybe aggregate.</param>
+        /// <param name="obj">The maybe aggregate.</param>
         /// <param name="func">The function to bind.</param>
         /// <param name="select">The result flattening selector.</param>
         /// <returns></returns>
@@ -242,13 +242,13 @@ namespace Interlook.Monads
         ///			s1.SelectMany(a => s2, (s1, b) => a + b)
         ///		</code>
         /// </remarks>
-        public static MaybeLazy<TResult> SelectMany<T1, T2, TResult>(this MaybeLazy<T1> a, Func<T1, MaybeLazy<T2>> func, Func<T1, T2, TResult> select)
+        public static MaybeLazy<TResult> SelectMany<T1, T2, TResult>(this MaybeLazy<T1> obj, Func<T1, MaybeLazy<T2>> func, Func<T1, T2, TResult> select)
         {
-            if (a == null) throw new ArgumentNullException(nameof(a));
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
             if (func == null) throw new ArgumentNullException(nameof(func));
             if (select == null) throw new ArgumentNullException(nameof(select));
 
-            return () => MaybeExtensions.Bind(a(), av => MaybeExtensions.Bind(func(av)(), fv => select(av, fv).ToMaybe()));
+            return () => MaybeExtensions.Bind(obj(), av => MaybeExtensions.Bind(func(av)(), fv => select(av, fv).ToMaybe()));
         }
 
         /// <summary>
@@ -326,6 +326,22 @@ namespace Interlook.Monads
         }
 
         /// <summary>
+        /// Binds an aggregate function to a lazy maybe monad.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the source.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="obj">The maybe aggregate.</param>
+        /// <param name="functionToBind">The function to bind.</param>
+        /// <returns>The resulting aggregate (maybe object) after binding the function to the given aggregate.</returns>
+        public static MaybeLazy<TResult> Bind<TSource, TResult>(this MaybeLazy<TSource> obj, Func<TSource, MaybeLazy<TResult>> functionToBind)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (functionToBind == null) throw new ArgumentNullException(nameof(functionToBind));
+
+            return () => obj() is Just<TSource> just ? functionToBind(just.Value)() : new Nothing<TResult>();
+        }
+
+        /// <summary>
         /// Evaluates the lazy monad and executes an action instantly.
         /// </summary>
         /// <typeparam name="T">Type of the aggregate (maybe object)</typeparam>
@@ -362,7 +378,11 @@ namespace Interlook.Monads
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
 
-            return () => new Lazy<Maybe<T>>(() => obj()).Value;
+            // not inside lambda-expression, otherwise every invocation
+            // would create a new lazy instance
+            var lazy = new Lazy<Maybe<T>>(() => obj());
+
+            return () => lazy.Value;
         }
 
         /// <summary>
@@ -508,7 +528,6 @@ namespace Interlook.Monads
         /// to an <see cref="IEnumerable{T}"/> and only returns values of <see cref="Just{T}"/>-instances,
         /// thus leaving out <see cref="Nothing{T}"/>-elements.
         /// </summary>
-        /// </summary>
         /// <typeparam name="TSource">The type of the objects within the source enumerator.</typeparam>
         /// <typeparam name="TResult">The type of the objects within the result enumerator.</typeparam>
         /// <param name="source">The source enumerator.</param>
@@ -568,6 +587,7 @@ namespace Interlook.Monads
         /// <summary>
         /// Returns a new lazy maybe monad encapsulating the first element returned by the enumerator
         /// or <see cref="Nothing{T}"/> for an empty enumerator.
+        /// </summary>
         /// <typeparam name="T">Der Elemententyp</typeparam>
         /// <param name="source">Die Quellauflistung.</param>
         /// <returns></returns>
@@ -580,12 +600,16 @@ namespace Interlook.Monads
 
         /// <summary>
         /// Returns a new lazy maybe monad encapsulating the first element of the enumerator
-        /// that matches a given filter or <see cref="Nothing{T}"/> for an enumerator with
+        /// that matches a given filter or <see cref="Nothing{T}" /> for an enumerator with
         /// no matching elements.
         /// </summary>
         /// <typeparam name="T">Der Elemententyp</typeparam>
         /// <param name="source">Die Quellauflistung.</param>
+        /// <param name="predicate">The filter predicate.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> or <paramref name="predicate"/> was <c>null</c>.
+        /// </exception>
         public static MaybeLazy<T> FirstToMaybeLazy<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));

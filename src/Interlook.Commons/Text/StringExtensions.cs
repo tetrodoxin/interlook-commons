@@ -124,7 +124,6 @@ namespace Interlook.Text
         /// contains whitespace characters.
         /// </summary>
         /// <param name="str">String object to check.</param>
-        /// <returns>
         public static bool IsNothing(this string str) => string.IsNullOrWhiteSpace(str);
 
         /// <summary>
@@ -302,7 +301,7 @@ namespace Interlook.Text
         /// Returns an alternative string, if this instance satisfies a given condition.
         /// </summary>
         /// <param name="str">The string to check.</param>
-        /// <param name="predicate">The condition to check for.</param>
+        /// <param name="predicate">The condition, that has to be true to use <paramref name="alternativeString"/>.</param>
         /// <param name="alternativeString">Alternative string, if the original satisfied the condition.</param>
         /// <returns>
         /// The original string or, if it satisfied the condition, the alternative string.
@@ -319,6 +318,23 @@ namespace Interlook.Text
             {
                 return str;
             }
+        }
+
+        /// <summary>
+        /// Returns an alternative string, if this instance satisfies a given condition.
+        /// </summary>
+        /// <param name="str">The string to check.</param>
+        /// <param name="predicate">The condition, that has to be true to use <paramref name="alternativeStringFactory"/>.</param>
+        /// <param name="alternativeStringFactory">A function, getting the current string to create the alternative string.</param>
+        /// <returns>
+        /// The original string or, if it satisfied the condition, the alternative string.
+        /// </returns>
+        public static string Otherwise(this string str, Func<string, bool> predicate, Func<string, string> alternativeStringFactory)
+        {
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+            if (alternativeStringFactory == null) throw new ArgumentNullException(nameof(alternativeStringFactory));
+
+            return predicate(str) ? alternativeStringFactory(str) : str;
         }
 
         /// <summary>
@@ -470,7 +486,7 @@ namespace Interlook.Text
         /// Compares an array of characters to another, by trying to achieve an almost constant time,
         /// to mitigate side channel attacks (timing attacks)
         /// </summary>
-        /// <param name="str">The original characters.</param>
+        /// <param name="original">The original characters.</param>
         /// <param name="candidate">The char array to compare.</param>
         /// <returns><c>true</c> if the two arrays match exactly (so even case sensitive), otherwise <c>false</c></returns>
         public static bool SecureEquals(this char[] original, char[] candidate)

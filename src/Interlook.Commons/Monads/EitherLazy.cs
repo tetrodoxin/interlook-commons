@@ -37,41 +37,124 @@ namespace Interlook.Monads
     /// <returns></returns>
     public delegate Either<TLeft, TRight> EitherLazy<TLeft, TRight>();
 
+    /// <summary>
+    /// Class with static helper/factory methods
+    /// </summary>
+    /// <typeparam name="TLeft">The left type.</typeparam>
     public static class EitherLazy<TLeft>
     {
+        /// <summary>
+        /// Factory method for a lazy either instance with a right value
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="valueFactory">Factory method for the right value.</param>
         public static EitherLazy<TLeft, TRight> Right<TRight>(Func<TRight> valueFactory) => EitherLazy.Right<TLeft, TRight>(valueFactory);
 
+        /// <summary>
+        /// Creates a lazy either instance with a right value.
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="valueFactory">Factory method for the right value.</param>
         public static EitherLazy<TLeft, TRight> Return<TRight>(Func<TRight> valueFactory) => Right(valueFactory);
 
+        /// <summary>
+        /// Factory method for a lazy either instance with a left value
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="valueFactory">Factory method for the left value.</param>
         public static EitherLazy<TLeft, TRight> Left<TRight>(Func<TLeft> valueFactory) => EitherLazy.Left<TLeft, TRight>(valueFactory);
     }
 
+    /// <summary>
+    /// Class with static extension and factory methods
+    /// </summary>
     public static class EitherLazy
     {
-        public static EitherLazy<TLeft, TRight> Left<TLeft, TRight>(Func<TLeft> valueFactory) => () => Either.Left<TLeft, TRight>(valueFactory());
+        /// <summary>
+        /// Factory method for a lazy either instance with a left value
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="valueFactory">Factory method for the left value.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="valueFactory"/> was <c>null</c>.</exception>
+        public static EitherLazy<TLeft, TRight> Left<TLeft, TRight>(Func<TLeft> valueFactory)
+        {
+            if (valueFactory == null) throw new ArgumentNullException(nameof(valueFactory));
 
+            return () => Either.Left<TLeft, TRight>(valueFactory());
+        }
+
+        /// <summary>
+        /// Factory method for a lazy either instance with a left value
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The left value</param>
         public static EitherLazy<TLeft, TRight> Left<TLeft, TRight>(TLeft value) => () => Either.Left<TLeft, TRight>(value);
 
-        public static EitherLazy<TLeft, TRight> Right<TLeft, TRight>(Func<TRight> valueFactory) => () => Either.Right<TLeft, TRight>(valueFactory());
+        /// <summary>
+        /// Factory method for a lazy either instance with a right value
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="valueFactory">Factory method for the right value.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="valueFactory"/> was <c>null</c>.</exception>
+        public static EitherLazy<TLeft, TRight> Right<TLeft, TRight>(Func<TRight> valueFactory)
+        {
+            if (valueFactory == null) throw new ArgumentNullException(nameof(valueFactory));
 
+            return () => Either.Right<TLeft, TRight>(valueFactory());
+        }
+
+        /// <summary>
+        /// Factory method for a lazy either instance with a right value
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The right value</param>
         public static EitherLazy<TLeft, TRight> Right<TLeft, TRight>(TRight value) => () => Either.Right<TLeft, TRight>(value);
 
+        /// <summary>
+        /// Factory method for a lazy either instance, whose state is
+        /// determined by a predicate function
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="predicate">The predicate function, which determines,
+        /// whether the instance will be in left or right state and thus
+        /// which factory method will be used.</param>
+        /// <param name="rightValueFactory">Factory method for the right value.</param>
+        /// <param name="leftValueFactory">Factory method for the left value.</param>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="predicate"/>, <paramref name="rightValueFactory"/> 
+        /// or <paramref name="leftValueFactory"/> was <c>null</c>
+        /// </exception>
         public static EitherLazy<TLeft, TRight> Create<TLeft, TRight>(Func<bool> predicate, Func<TRight> rightValueFactory, Func<TLeft> leftValueFactory)
-            =>  () =>
-                {
-                    return predicate()
-                    ? new Right<TLeft, TRight>(rightValueFactory())
-                    : (Either<TLeft, TRight>)new Left<TLeft, TRight>(leftValueFactory());
-                };
+        {
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+            if (rightValueFactory == null) throw new ArgumentNullException(nameof(rightValueFactory));
+            if (leftValueFactory == null) throw new ArgumentNullException(nameof(leftValueFactory));
+
+            return () =>
+                            {
+                                return predicate()
+                                ? new Right<TLeft, TRight>(rightValueFactory())
+                                : (Either<TLeft, TRight>)new Left<TLeft, TRight>(leftValueFactory());
+                            };
+        }
 
         /// <summary>
         /// Evaluates the either monad and returns if it
         /// is in the left-state
         /// </summary>
-        /// <typeparam name="TLeft"></typeparam>
-        /// <typeparam name="TRight"></typeparam>
-        /// <param name="either"></param>
-        /// <returns></returns>
+        /// <typeparam name="L">The left data type</typeparam>
+        /// <typeparam name="R">The right data type</typeparam>
+        /// <param name="either">A lazy either instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified either is left; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">either was <c>null</c></exception>
         public static bool IsLeft<L, R>(this EitherLazy<L, R> either)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
@@ -83,10 +166,9 @@ namespace Interlook.Monads
         /// Evaluates the either monad and returns if it
         /// is in the right-state
         /// </summary>
-        /// <typeparam name="TLeft"></typeparam>
-        /// <typeparam name="TRight"></typeparam>
-        /// <param name="either"></param>
-        /// <returns></returns>
+        /// <typeparam name="L">The left data type</typeparam>
+        /// <typeparam name="R">The right data type</typeparam>
+        /// <param name="either">A lazy either instance.</param>
         public static bool IsRight<L, R>(this EitherLazy<L, R> either)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
@@ -115,23 +197,56 @@ namespace Interlook.Monads
         /// Will throw an exception, if the encapsulated either\
         /// is not in right-state.
         /// </summary>
-        /// <typeparam name="TLeft"></typeparam>
-        /// <typeparam name="TRight"></typeparam>
-        /// <param name="either"></param>
+        /// <typeparam name="TLeft">The type of the left.</typeparam>
+        /// <typeparam name="TRight">The type of the right.</typeparam>
+        /// <param name="either">The either.</param>
         /// <returns></returns>
-        public static R GetRight<L, R>(this EitherLazy<L, R> either)
+        /// <exception cref="ArgumentNullException">If <paramref name="either"/> was <c>null</c>.</exception>
+        public static TRight GetRight<TLeft, TRight>(this EitherLazy<TLeft, TRight> either)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
 
             return either().GetRight();
         }
 
-        public static EitherLazy<L, R2> Bind<L, R1, R2>(this EitherLazy<L, R1> either, Func<R1, Either<L, R2>> functionToBind)
+        /// <summary>
+        /// Binds the specified function.
+        /// </summary>
+        /// <typeparam name="TLeft">The left data type</typeparam>
+        /// <typeparam name="TRightSource">The right type of the specified either.</typeparam>
+        /// <typeparam name="TRightResult">The right type of the resulting either instance.</typeparam>
+        /// <param name="either">First either instance.</param>
+        /// <param name="functionToBind">The function to bind.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/> or <paramref name="functionToBind"/> was <c>null</c>.
+        /// </exception>
+        public static EitherLazy<TLeft, TRightResult> Bind<TLeft, TRightSource, TRightResult>(this EitherLazy<TLeft, TRightSource> either, Func<TRightSource, Either<TLeft, TRightResult>> functionToBind)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
             if (functionToBind == null) throw new ArgumentNullException(nameof(functionToBind));
 
-            return () => either().IsLeft ? new Left<L, R2>(either().GetLeft()) : functionToBind(either().GetRight());
+            return () => either().IsLeft ? new Left<TLeft, TRightResult>(either().GetLeft()) : functionToBind(either().GetRight());
+        }
+
+        /// <summary>
+        /// Binds the specified function.
+        /// </summary>
+        /// <typeparam name="TLeft">The left data type</typeparam>
+        /// <typeparam name="TRightSource">The right type of the specified either.</typeparam>
+        /// <typeparam name="TRightResult">The right type of the resulting either instance.</typeparam>
+        /// <param name="either">First either instance.</param>
+        /// <param name="functionToBind">The function to bind.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/> or <paramref name="functionToBind"/> was <c>null</c>.
+        /// </exception>
+        public static EitherLazy<TLeft, TRightResult> Bind<TLeft, TRightSource, TRightResult>(this EitherLazy<TLeft, TRightSource> either, Func<TRightSource, EitherLazy<TLeft, TRightResult>> functionToBind)
+        {
+            if (either == null) throw new ArgumentNullException(nameof(either));
+            if (functionToBind == null) throw new ArgumentNullException(nameof(functionToBind));
+
+            return () => either().IsLeft ? new Left<TLeft, TRightResult>(either().GetLeft()) : functionToBind(either().GetRight())();
         }
 
         /// <summary>
@@ -143,7 +258,9 @@ namespace Interlook.Monads
         /// <param name="either">Either-object</param>
         /// <param name="errorCondition">Error condition.</param>
         /// <param name="errorValue">Error value, assigned to left state if function fails.</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/>, <paramref name="errorCondition"/> or <paramref name="errorValue"/> was <c>null</c>.
+        /// </exception>
         public static EitherLazy<TLeft, TRight> FailIf<TLeft, TRight>(this EitherLazy<TLeft, TRight> either, Func<TRight, bool> errorCondition, TLeft errorValue)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
@@ -162,7 +279,9 @@ namespace Interlook.Monads
         /// <param name="either">a.</param>
         /// <param name="selector">The function.</param>
         /// <param name="mapper">The select.</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/>, <paramref name="selector"/> or <paramref name="mapper"/> was <c>null</c>.
+        /// </exception>
         public static EitherLazy<L, TR> SelectMany<L, R1, R2, TR>(this EitherLazy<L, R1> either, Func<R1, EitherLazy<L, R2>> selector, Func<R1, R2, TR> mapper)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
@@ -180,7 +299,9 @@ namespace Interlook.Monads
         /// <typeparam name="R2">The type of the 2.</typeparam>
         /// <param name="either">The either.</param>
         /// <param name="selector">The selector.</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/> or <paramref name="selector"/> was <c>null</c>.
+        /// </exception>
         public static EitherLazy<L, R2> Select<L, R1, R2>(this EitherLazy<L, R1> either, Func<R1, R2> selector)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
@@ -198,7 +319,7 @@ namespace Interlook.Monads
         /// <typeparam name="TLeft">Left data type.</typeparam>
         /// <typeparam name="TRight">Right data type.</typeparam>
         /// <param name="source">Source enumerator of lazy either monads.</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="source"/>was <c>null</c>.</exception>
         public static IEnumerable<TLeft> Lefts<TLeft, TRight>(this IEnumerable<EitherLazy<TLeft, TRight>> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -219,6 +340,7 @@ namespace Interlook.Monads
         /// <typeparam name="TRight">Right data type.</typeparam>
         /// <param name="source">Source enumerator of lazy either monads.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="source"/>was <c>null</c>.</exception>
         public static IEnumerable<TRight> Rights<TLeft, TRight>(this IEnumerable<EitherLazy<TLeft, TRight>> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -240,6 +362,7 @@ namespace Interlook.Monads
         /// <typeparam name="TRight">Right data type.</typeparam>
         /// <param name="source">Source enumerator of lazy either monads.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="source"/>was <c>null</c>.</exception>
         public static (IEnumerable<TLeft> Left, IEnumerable<TRight> Right) PartitionEithers<TLeft, TRight>(this IEnumerable<EitherLazy<TLeft, TRight>> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -261,6 +384,8 @@ namespace Interlook.Monads
         /// <param name="leftFunction">Function to be used for left state.</param>
         /// <param name="rightFunction">Function to be used for right state.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="either"/>, 
+        /// <paramref name="leftFunction"/> or <paramref name="rightFunction"/> was <c>null</c>.</exception>
         public static TResult MapEither<TLeft, TRight, TResult>(this EitherLazy<TLeft, TRight> either, Func<TLeft, TResult> leftFunction, Func<TRight, TResult> rightFunction)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
@@ -280,10 +405,13 @@ namespace Interlook.Monads
         /// <typeparam name="TRight">Right data type.</typeparam>
         /// <param name="either">Lazy either monad.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="either"/>was <c>null</c>.</exception>
         public static EitherLazy<TLeft, TRight> Memoize<TLeft, TRight>(this EitherLazy<TLeft, TRight> either)
         {
             if (either == null) throw new ArgumentNullException(nameof(either));
 
+            // not inside lambda-expression, otherwise every invocation
+            // would create a new lazy instance
             var result = new Lazy<Either<TLeft, TRight>>(() => either());
 
             return () => result.Value;

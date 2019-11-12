@@ -43,7 +43,7 @@ namespace Interlook.Collections
         public TValue NullEntryValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="TValue"/> with the specified key.
+        /// Gets or sets the <typeparamref name="TValue"/> with the specified key.
         /// </summary>
         /// <value>
         /// The value for the key (including <c>null</c>).
