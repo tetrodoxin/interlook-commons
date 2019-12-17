@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451;netcoreapp2.2</TargetFrameworks>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <Version>1.2.0</Version>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
+    <Version>1.3.0</Version>
     <Company>Andreas H.</Company>
     <Description>Another library of daily basis tools, one could wish to be included in .NET</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -12,14 +13,17 @@
     <RepositoryUrl>https://github.com/tetrodoxin/interlook-commons.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/tetrodoxin/interlook-commons</PackageProjectUrl>
     <PackageTags>general, csharp, library, extension, miscellaneous, general-purpose</PackageTags>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
-    <DocumentationFile>C:\Users\huebnera\git_repos\Externe\interlook.commons\src\Interlook.Commons\Interlook.Commons.xml</DocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>  
   
   <ItemGroup>
