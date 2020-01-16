@@ -5,11 +5,11 @@ using Xunit;
 
 namespace Interlook.Security.Tests
 {
-    public class StringEncryptionExtTests
+    public class SecurityStringEncryptionExtTests
     {
         private static SecureString _securePass = new SecureString().InitFromCharArray("ThisIsANotSoSecurepasswordnumberseven".ToCharArray());
-        private const string Text1 = "And thou shall add the Book Of Flavor Flav to the Bible";
-        private const string Text2 = "I'm the least you could do, If only life were as easy as you";
+        private static SecureString Text1 = new SecureString().InitFromCharArray("And thou shall add the Book Of Flavor Flav to the Bible".ToCharArray());
+        private static SecureString Text2 = new SecureString().InitFromCharArray("I'm the least you could do, If only life were as easy as you".ToCharArray());
 
         #region Hash Tests
 
@@ -159,82 +159,75 @@ namespace Interlook.Security.Tests
 
         #endregion Hash Tests
 
+        #region Excryptions
+
         [Fact]
         public void Machine_Encryption_Test()
         {
-            var s = Text1;
-            var encrypted = s.EncryptStringForMachine();
-            var decrypted = encrypted.DecryptStringForMachine();
+            var plainText = Text1;
+            var encrypted = plainText.EncryptForMachine();
+            var decrypted = encrypted.DecryptSecureStringForMachine();
 
-            Assert.Equal(s, decrypted);
+            Assert.True(plainText.SecureStringEqual(decrypted));
         }
 
         [Fact]
         public void Machine_EncryptionWithUtf8_Test()
         {
-            var s = Text1;
-            var encrypted = s.EncryptStringForMachine(Encoding.UTF8);
-            var decrypted = encrypted.DecryptStringForMachine(Encoding.UTF8);
+            var plainText = Text1;
+            var entropy = EncryptionHelper.DefaultEntropy256.Reverse().ToArray();
+            var encrypted = plainText.EncryptForMachine(entropy);
+            var decrypted = encrypted.DecryptSecureStringForMachine(entropy);
 
-            Assert.Equal(s, decrypted);
+            Assert.True(plainText.SecureStringEqual(decrypted));
         }
 
         [Fact]
         public void User_Encryption_Test()
         {
-            var s = Text1;
-            var encrypted = s.EncryptStringForUser();
-            var decrypted = encrypted.DecryptStringForUser();
+            var plainText = Text1;
+            var encrypted = plainText.EncryptForUser();
+            var decrypted = encrypted.DecryptSecureStringForUser();
 
-            Assert.Equal(s, decrypted);
+            Assert.True(plainText.SecureStringEqual(decrypted));
         }
 
         [Fact]
         public void User_EncryptionWithUtf8_Test()
         {
-            var s = Text1;
-            var encrypted = s.EncryptStringForUser(Encoding.UTF8);
-            var decrypted = encrypted.DecryptStringForUser(Encoding.UTF8);
+            var plainText = Text1;
+            var entropy = EncryptionHelper.DefaultEntropy256.Reverse().ToArray();
+            var encrypted = plainText.EncryptForUser(entropy);
+            var decrypted = encrypted.DecryptSecureStringForUser(entropy);
 
-            Assert.Equal(s, decrypted);
+            Assert.True(plainText.SecureStringEqual(decrypted));
         }
 
         [Fact]
         public void Aes_Encryption_Test()
         {
-            var s = Text1;
-            var encrypted = s.EncryptStringWith(_securePass);
-            var decrypted = encrypted.DecryptStringWith(_securePass);
+            var plainText = Text1;
+            var encrypted = plainText.EncryptWith(_securePass);
+            var decrypted = encrypted.DecryptSecureStringWith(_securePass);
 
-            Assert.Equal(s, decrypted);
-
-        }
-
-        [Fact]
-        public void Aes_EncryptionUtf8_Test()
-        {
-            var s = Text1;
-            var encrypted = s.EncryptStringWith(_securePass, Encoding.UTF8);
-            var decrypted = encrypted.DecryptStringWith(_securePass, Encoding.UTF8);
-
-            Assert.Equal(s, decrypted);
-
+            Assert.True(plainText.SecureStringEqual(decrypted));
         }
 
         [Fact]
         public void Aes_Encryption_InitVectorMatters_Test()
         {
-            var s = Text1;
+            var plainText = Text1;
 
             var salt = EncryptionHelper.DefaultSalt256.ToArray();
             var iv = EncryptionHelper.DefaultInitVector128.ToArray();
             var iv2 = EncryptionHelper.DefaultInitVector128.Reverse().ToArray();
 
-            var encrypted = s.EncryptStringWith(_securePass, iv, salt, Encoding.Unicode);
-            var decrypted = encrypted.DecryptStringWith(_securePass, iv2, salt, Encoding.Unicode);
+            var encrypted = plainText.EncryptWith(_securePass, iv, salt);
+            var decrypted = encrypted.DecryptSecureStringWith(_securePass, iv2, salt);
 
-            Assert.NotEqual(s, decrypted);
-
+            Assert.False(plainText.SecureStringEqual(decrypted));
         }
+
+        #endregion Excryptions
     }
 }

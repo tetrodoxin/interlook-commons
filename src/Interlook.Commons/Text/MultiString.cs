@@ -2,7 +2,7 @@
 
 //MIT License
 
-//Copyright(c) 2013-2019 Andreas Hübner
+//Copyright(c) 2013-2020 Andreas Hübner
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -103,6 +103,13 @@ namespace Interlook.Text
 
         #region Cast operators
 
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MultiString"/> to <see cref="System.String"/>.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
         public static implicit operator string(MultiString obj)
         {
             if (obj != null)
@@ -115,6 +122,13 @@ namespace Interlook.Text
             }
         }
 
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="System.String"/> to <see cref="MultiString"/>.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
         public static implicit operator MultiString(string str)
         {
             var result = new MultiString();
@@ -130,6 +144,12 @@ namespace Interlook.Text
 
         #region IEnumerator
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the strings.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.IEnumerator`1" /> that can be used to iterate through all contained strings.
+        /// </returns>
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
             yield return new KeyValuePair<string, string>(null, Content);

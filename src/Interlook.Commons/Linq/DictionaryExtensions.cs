@@ -2,7 +2,7 @@
 
 //MIT License
 
-//Copyright(c) 2013-2019 Andreas Hübner
+//Copyright(c) 2013-2020 Andreas Hübner
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@
 //SOFTWARE.
 
 #endregion 
+#if NET451PLUS
+
 using System;
 using Interlook.Monads;
 
@@ -163,3 +165,5 @@ namespace System.Collections.Generic
         }
     }
 }
+
+#endif

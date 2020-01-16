@@ -3,7 +3,8 @@ interlook-commons
 
 Another library of daily basis tools, one could wish to be included in .NET
 
-**Now supporting .Net Core and .NET 4.5.1**
+
+Supporting .Net Core 2.2, .NET 4.5.1 and .NET 4.7.2
 
 ## Description
 
