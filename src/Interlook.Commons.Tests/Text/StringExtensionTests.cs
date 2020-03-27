@@ -30,18 +30,18 @@ namespace Interlook.Text.Tests
         public void AintNullNorEmptyPositiveTest()
         {
             var s = " ";
-            Assert.True(s.AintNullNorEmpty(), "A single whitespace character lead to false for IsNullOrEmpty().");
+            Assert.True(s.IsNeitherNullNorEmpty(), "A single whitespace character lead to false for IsNullOrEmpty().");
             s = "not empty";
-            Assert.True(s.AintNullNorEmpty(), "the string '" + s + "' lead to false for IsNullOrEmpty().");
+            Assert.True(s.IsNeitherNullNorEmpty(), "the string '" + s + "' lead to false for IsNullOrEmpty().");
         }
 
         [Fact]
         public void AintNullNorEmptyNegativeTest()
         {
             var s = String.Empty;
-            Assert.False(s.AintNullNorEmpty(), "String.Empty lead to true for AintNullNorEmpty().");
+            Assert.False(s.IsNeitherNullNorEmpty(), "String.Empty lead to true for AintNullNorEmpty().");
             s = null;
-            Assert.False(s.AintNullNorEmpty(), "NULL string lead to true for AintNullNorEmpty().");
+            Assert.False(s.IsNeitherNullNorEmpty(), "NULL string lead to true for AintNullNorEmpty().");
         }
 
         [Fact]

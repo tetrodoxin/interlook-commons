@@ -300,7 +300,7 @@ namespace Interlook.Monads
         /// <param name="errorCondition">Error condition.</param>
         /// <param name="errorValue">Error value, assigned to left state if function fails.</param>
         /// <returns>
-        /// Either-instance in the possibly changed state.
+        /// Possibly a new Either-instance with changed state.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// If <paramref name="either"/> or <paramref name="errorCondition"/> was <c>null</c>.
@@ -310,8 +310,31 @@ namespace Interlook.Monads
             if (either == null) throw new ArgumentNullException(nameof(either));
             if (errorCondition == null) throw new ArgumentNullException(nameof(errorCondition));
 
-            if (either.IsRight && errorCondition(either.GetRight())) return Left<TLeft, TRight>(errorValue);
-            else return either;
+            return either.Bind(value => errorCondition(value) ? Left<TLeft, TRight>(errorValue) : either);
+        }
+
+        /// <summary>
+        /// Switches to the left (failed) state under conditions, defined by a function.
+        /// If that function results in <c>false</c>, nothing is altered.
+        /// </summary>
+        /// <typeparam name="TLeft">Left data type (Error)</typeparam>
+        /// <typeparam name="TRight">Right data type (Result)</typeparam>
+        /// <param name="either">Either-object</param>
+        /// <param name="errorCondition">Error condition.</param>
+        /// <param name="errorValueFactory">A function, that returns the left (error) value.</param>
+        /// <returns>
+        /// Possibly a new Either-instance with changed state.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/> or <paramref name="errorCondition"/> was <c>null</c>.
+        /// </exception>
+        public static Either<TLeft, TRight> FailIf<TLeft, TRight>(this Either<TLeft, TRight> either, Func<TRight, bool> errorCondition, Func<TRight, TLeft> errorValueFactory)
+        {
+            if (either == null) throw new ArgumentNullException(nameof(either));
+            if (errorCondition == null) throw new ArgumentNullException(nameof(errorCondition));
+            errorValueFactory ??= (p => default);
+
+            return either.Bind(value => errorCondition(value) ? Left<TLeft, TRight>(errorValueFactory(value)) : either);
         }
 
         /// <summary>

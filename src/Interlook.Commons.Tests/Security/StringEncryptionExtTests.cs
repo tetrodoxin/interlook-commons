@@ -90,7 +90,7 @@ namespace Interlook.Security.Tests
         [InlineData("Retrofit the pudding hatch With the boink swatter", "fad5769b085dbf75349491f90f00cae4cb8e39a66d225bde45cbfc5370e47ecb6e82874f75e88a967950ca45c71397de85c0ca43feb7dc4e3d5109ad0d70d1f6", "FoxUniCharKi773")]
         public void GetSHA512PositiveTest_UTF8(string original, string expected, string salt)
         {
-            string actual = null;
+            string actual;
             if (salt == null)
             {
                 actual = original.GetSHA512(Encoding.UTF8).ToLower();

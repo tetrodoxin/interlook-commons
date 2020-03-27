@@ -341,7 +341,7 @@ namespace Interlook.Monads
         /// <param name="actionToApply">The action to apply.</param>
         /// <returns>The aggregate that was provided.</returns>
         /// <remarks>
-        /// This method may cause side effects using the aggregate value and
+        /// This method may cause SIDE EFFECTS using the aggregate value and
         /// does not change the aggregate itself.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="obj"/> or <paramref name="actionToApply"/> was <c>null</c>.</exception>

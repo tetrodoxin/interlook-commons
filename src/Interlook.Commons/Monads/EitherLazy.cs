@@ -270,6 +270,28 @@ namespace Interlook.Monads
         }
 
         /// <summary>
+        /// Switches to the left (failed) state under conditions, defined by a function.
+        /// If this function results in <c>false</c>, nothing is altered.
+        /// </summary>
+        /// <typeparam name="TLeft">Left data type (Error)</typeparam>
+        /// <typeparam name="TRight">Right data type (Result)</typeparam>
+        /// <param name="either">Either-object</param>
+        /// <param name="errorCondition">Error condition.</param>
+        /// <param name="errorValueFactory">A function, that returns the left (error) value.</param>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="either"/>, <paramref name="errorCondition"/>.
+        /// </exception>
+        public static EitherLazy<TLeft, TRight> FailIf<TLeft, TRight>(this EitherLazy<TLeft, TRight> either, Func<TRight, bool> errorCondition, Func<TRight, TLeft> errorValueFactory)
+        {
+            if (either == null) throw new ArgumentNullException(nameof(either));
+            if (errorCondition == null) throw new ArgumentNullException(nameof(errorCondition));
+
+            errorValueFactory ??= (p => default);
+
+            return () => either().Bind(value => errorCondition(value) ? new Left<TLeft, TRight>(errorValueFactory(value)) : either());
+        }
+
+        /// <summary>
         /// Just for LINQ-Query-Support
         /// </summary>
         /// <typeparam name="L"></typeparam>

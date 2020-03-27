@@ -99,7 +99,7 @@ namespace Interlook.Components
                     StringBuilder sb = new StringBuilder("Method Failed. ")
                         .AppendFormat("Return code = {0}", this.ReturnCode);
 
-                    if (this.ReturnMessage.AintNullNorEmpty())
+                    if (this.ReturnMessage.IsNeitherNullNorEmpty())
                     {
                         sb.AppendFormat(", Return message = '{0}'", this.ReturnMessage);
                     }

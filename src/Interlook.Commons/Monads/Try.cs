@@ -22,7 +22,8 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
 
 namespace Interlook.Monads
@@ -73,28 +74,24 @@ namespace Interlook.Monads
 
             if (obj is Failure<T> firstFail)
             {
-                return new Failure<T>(firstFail.Error);
+                return firstFail;
             }
             else
             {
-                try
+                if (other is Failure<T> secondFail)
                 {
-                    if (other is Failure<T> secondFail) return new Failure<T>(secondFail.Error);
-                    else
-                    {
-                        try
-                        {
-                            return new Success<T>(combiner(((Success<T>)obj).Value, ((Success<T>)other).Value));
-                        }
-                        catch (Exception ex)
-                        {
-                            return new Failure<T>(ex);
-                        }
-                    }
+                    return secondFail;
                 }
-                catch (Exception ex)
+                else
                 {
-                    return new Failure<T>(ex);
+                    try
+                    {
+                        return new Success<T>(combiner(((Success<T>)obj).Value, ((Success<T>)other).Value));
+                    }
+                    catch (Exception ex)
+                    {
+                        return new Failure<T>(ex);
+                    }
                 }
             }
         }
@@ -256,7 +253,7 @@ namespace Interlook.Monads
     /// <seealso cref="Interlook.Monads.Try{TResult}" />
     public sealed class Failure<TResult> : Try<TResult>
     {
-        private int _errorHash;
+        private readonly int _errorHash;
 
         /// <summary>
         /// Returns the error object
@@ -270,15 +267,14 @@ namespace Interlook.Monads
         /// <c>true</c>, since this implementation represents failures.
         /// </value>
         public override bool Failed => true;
+
         /// <summary>
         /// Creates a new <see cref="Failure{TResult}"/> instance
         /// </summary>
         /// <param name="error">The error object to assign to the instance. Must not be <c>null</c></param>
         public Failure(object error)
         {
-            if (error == null) throw new ArgumentNullException(nameof(error));
-
-            Error = error;
+            Error = error ?? throw new ArgumentNullException(nameof(error));
             _errorHash = Error.GetHashCode();
         }
 
@@ -291,6 +287,7 @@ namespace Interlook.Monads
         /// <summary>Returns a hash code for this instance.</summary>
         /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode() => _errorHash;
+
         /// <summary>
         /// Does not bind a function (since it's in failure state already)
         /// but returns another <see cref="Failure{T}"/> instance
@@ -310,7 +307,7 @@ namespace Interlook.Monads
     /// <seealso cref="Interlook.Monads.Try{TResult}" />
     public sealed class Success<TResult> : Try<TResult>
     {
-        private int _valueHash;
+        private readonly int _valueHash;
 
         /// <summary>
         /// Gets a value indicating whether the represented method
@@ -325,6 +322,7 @@ namespace Interlook.Monads
         /// Gets the actual result value.
         /// </summary>
         public TResult Value { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Success{TResult}"/> class,
         /// representing a successful method invocation
@@ -335,6 +333,7 @@ namespace Interlook.Monads
             Value = value;
             _valueHash = value == null ? 0 : value.GetHashCode();
         }
+
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
@@ -351,6 +350,7 @@ namespace Interlook.Monads
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode() => _valueHash;
+
         /// <summary>
         /// Binds a function to the internal state/value
         /// and returns a new <see cref="Try{T}"/> instance,\

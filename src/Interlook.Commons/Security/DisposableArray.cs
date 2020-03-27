@@ -39,11 +39,11 @@ namespace Interlook.Security
     /// <seealso cref="System.IDisposable" />
     public abstract class DisposableArray<T> : IDisposable
     {
-        private List<IDisposable> _additionalDisposables = new List<IDisposable>();
+        private readonly List<IDisposable> _additionalDisposables = new List<IDisposable>();
 
-        private int _hash;
+        private readonly int _hash;
 
-        private bool disposedValue = false;
+        private bool _disposedValue = false;
 
         /// <summary>
         /// Gets the length of the original array.
@@ -75,9 +75,7 @@ namespace Interlook.Security
         /// <exception cref="ArgumentNullException">if <paramref name="content"/> was <c>null</c>.</exception>
         protected DisposableArray(T[] content)
         {
-            if (content == null) throw new ArgumentNullException(nameof(content));
-
-            OriginalArray = content;
+            OriginalArray = content ?? throw new ArgumentNullException(nameof(content));
             _hash = content.GetHashCode();
             Length = content.Length;
         }
@@ -174,13 +172,13 @@ namespace Interlook.Security
 
         private void doDispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     for (int i = 0; i < OriginalArray.Length; i++)
                     {
-                        OriginalArray[i] = default(T);
+                        OriginalArray[i] = default;
                     }
 
                     OriginalArray = null;
@@ -193,7 +191,7 @@ namespace Interlook.Security
                     AdditionalDisposing();
                 }
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

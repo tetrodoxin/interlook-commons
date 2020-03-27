@@ -70,7 +70,7 @@ namespace Interlook.Monads
         /// <typeparam name="TValue">The type of the value.</typeparam>
         /// <param name="value">The value for the object. Defaults to <c>default(TValue)</c> if not specified.</param>
         /// <returns>A new <see cref="State{TState, TValue}"/> instance with the specified or the default value.</returns>
-        public static State<TState, TValue> ReturnState<TState, TValue>(TValue value = default(TValue))
+        public static State<TState, TValue> ReturnState<TState, TValue>(TValue value = default)
             => state => new StateEntry<TState, TValue>(state, value);
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace System.Linq
     /// <summary>
     /// Contains helper methods for enumerators and LINQ2Objects
     /// </summary>
-    public static class EnumerationExtensions
+    public static class EnumerableExtensions
     {
         /// <summary>
         /// Determines, if a sequence contains any elements WITHOUT
@@ -276,7 +276,7 @@ namespace System.Linq
         }
 
         /// <summary>
-        /// Helper flag for break support in <see cref="EnumerationExtensions.ForEach{T}(IEnumerable{T}, Action{T, int, CancelProc})"/>
+        /// Helper flag for break support in <see cref="EnumerableExtensions.ForEach{T}(IEnumerable{T}, Action{T, int, CancelProc})"/>
         /// </summary>
         public struct CancelProc
         {

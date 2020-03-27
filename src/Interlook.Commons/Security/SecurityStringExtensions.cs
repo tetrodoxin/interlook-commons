@@ -67,7 +67,7 @@ namespace System.Security
             if (password != null)
             {
                 int passwordLength = password.Length;
-                if (salt.AintNullNorEmpty())
+                if (salt.IsNeitherNullNorEmpty())
                 {
                     passwordLength += salt.Length;
                 }
@@ -79,7 +79,7 @@ namespace System.Security
                 Marshal.Copy(passwortPointer, passwordChars, 0, passwordLength);
                 Marshal.ZeroFreeBSTR(passwortPointer);
 
-                if (salt.AintNullNorEmpty())
+                if (salt.IsNeitherNullNorEmpty())
                 {
                     Array.Copy(salt.ToArray(), 0, passwordChars, password.Length, salt.Length);
                 }
@@ -95,7 +95,7 @@ namespace System.Security
                     passwordChars[i] = '\0';
                 }
 
-                result = ConvertToHexString(hashedPasswordBytes);
+                result = convertToHexString(hashedPasswordBytes);
             }
             return result;
         }
@@ -597,7 +597,7 @@ namespace System.Security
             }
         }
 
-        private static string ConvertToHexString(IEnumerable<byte> bytes)
+        private static string convertToHexString(IEnumerable<byte> bytes)
         {
             StringBuilder sb = new StringBuilder();
             foreach (byte b in bytes)

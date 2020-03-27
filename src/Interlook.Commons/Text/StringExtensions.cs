@@ -22,11 +22,13 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Interlook.Text
 {
@@ -35,9 +37,7 @@ namespace Interlook.Text
     /// </summary>
     public static class StringExtensions
     {
-        private static readonly char[] maximumStringArray = new char[0xa000];
-
-        private static Dictionary<string, string> latinNormCharsArray = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> _latinNormCharsArray = new Dictionary<string, string>()
         {
             { "Ä", "AE" },
             { "Á", "A" },
@@ -79,9 +79,9 @@ namespace Interlook.Text
         /// </summary>
         /// <param name="str">The string to test.</param>
         /// <returns><c>true</c> if the given string actually contains characters. Otherwise, if it's empty or even <c>null</c>, <c>false</c> is returned.</returns>
-        public static bool AintNullNorEmpty(this string str)
+        public static bool IsNeitherNullNorEmpty(this string str)
         {
-            return !(String.IsNullOrEmpty(str));
+            return !(string.IsNullOrEmpty(str));
         }
 
         /// <summary>
@@ -118,6 +118,13 @@ namespace Interlook.Text
         /// <param name="str">The string to test.</param>
         /// <returns>The given string itself, if it was not <c>null</c>, otherwise an empty string is returned.</returns>
         public static string Ensure(this string str) => str ?? string.Empty;
+
+        /// <summary>
+        /// Checks if a string is neither <c>null</c>, nor empty \
+        /// nor just consists of whitespace characters.
+        /// </summary>
+        /// <param name="str">String object to check.</param>
+        public static bool IsNotNothing(this string str) => !string.IsNullOrWhiteSpace(str);
 
         /// <summary>
         /// Checks if a string is <c>null</c>, empty or just
@@ -245,6 +252,28 @@ namespace Interlook.Text
         }
 
         /// <summary>
+        /// Limits a string to a specific length and adds
+        /// an ellipsis, if truncation was necessary.
+        /// </summary>
+        /// <param name="str">String to limit in length.</param>
+        /// <param name="maxLength">Maximum length of the string.</param>
+        /// <param name="ellipsis"></param>
+        /// <returns>
+        /// A <see cref="string"/>, whose length never exceeds given <c>maxLength</c>.
+        /// </returns>
+        public static string Limit(this string str, int maxLength, string ellipsis)
+        {
+            if (string.IsNullOrEmpty(str) || str.Length <= maxLength)
+            {
+                return str;
+            }
+            else
+            {
+                return str.Substring(0, maxLength) + (ellipsis ?? string.Empty);
+            }
+        }
+
+        /// <summary>
         /// Checks if a string matches a regular expression.
         /// </summary>
         /// <param name="value">The string value to check.</param>
@@ -270,7 +299,7 @@ namespace Interlook.Text
             else
             {
                 str = str.ToUpper();
-                foreach (var pair in latinNormCharsArray)
+                foreach (var pair in _latinNormCharsArray)
                 {
                     str = str.Replace(pair.Key, pair.Value);
                 }
@@ -417,7 +446,7 @@ namespace Interlook.Text
         /// <returns>Converted <see cref="TimeSpan"/> value or <c>0</c> seconds.</returns>
         public static TimeSpan ParseTimeSpanOrDefault(this string str)
         {
-            if (string.IsNullOrEmpty(str.TrimProtected()))
+            if (string.IsNullOrEmpty(str?.Trim()))
             {
                 return TimeSpan.FromSeconds(0);
             }
@@ -489,26 +518,32 @@ namespace Interlook.Text
         /// <param name="original">The original characters.</param>
         /// <param name="candidate">The char array to compare.</param>
         /// <returns><c>true</c> if the two arrays match exactly (so even case sensitive), otherwise <c>false</c></returns>
+        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
         public static bool SecureEquals(this char[] original, char[] candidate)
         {
-            int result = 0;
-            int origPos = 0;
-            int candPos = 0;
-            int dummy = 0;
+            if (original == null || candidate == null) return false;
 
             int origLastPos = original.Length - 1;
             int candLastPos = candidate.Length - 1;
 
-            if (original == null || candidate == null) return false;
+            // if both string are not of the same length, 
+            // result is !=0 and thus we won't return
+            // true in any case
+            int result = origLastPos - candLastPos;     
+
+            int origPos = 0;
+            int candPos = 0;
+            int dummy = 0;
 
             while (true)
             {
                 result |= original[origPos] ^ candidate[candPos];
 
-                if (origPos == origLastPos) break;
+                if (origPos == origLastPos) break;      // no matter how long candidate is, check is always over hidden original length => no leaking
 
                 origPos++;
 
+                // always: 2 checks but only one increment
                 if (candPos != candLastPos) candPos++;
                 if (candPos == candLastPos) dummy++;
             }
@@ -522,8 +557,26 @@ namespace Interlook.Text
         /// <param name="str">The string.</param>
         /// <param name="length">Number of characters to skip.</param>
         /// <returns>The remainder of the string, which may be empty,
-        /// if the original string was shorter than <c>n</c>.</returns>
+        /// if the original string was shorter than <paramref name="length"/>.</returns>
         public static string Skip(this string str, int length)
+        {
+            if (string.IsNullOrEmpty(str) || length <= 0)
+            {
+                return str;
+            }
+
+            int startIndex = Math.Min(length, str.Length);
+            return str.Substring(startIndex - 1);
+        }
+
+        /// <summary>
+        /// Returns the head of the string, by cutting the trailing n characters.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <param name="length">Number of characters at the end of the string to omit.</param>
+        /// <returns>The head of the string, which may be empty,
+        /// if the original string was shorter than <paramref name="length"/>.</returns>
+        public static string CutTail(this string str, int length)
         {
             if (string.IsNullOrEmpty(str) || length <= 0)
             {
@@ -540,6 +593,7 @@ namespace Interlook.Text
         /// <param name="str">The string object to trim safely (may be null).</param>
         /// <returns>A trimmed copy of the provided string or an empty string, if the parameter string was <c>null</c>.
         /// Is never <c>null</c></returns>
+        [Obsolete("Consider using Null-conditional operator, like str?.Protected()")]
         public static string TrimProtected(this string str) => string.IsNullOrEmpty(str) ? str : str.Trim();
     }
 }
