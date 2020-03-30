@@ -59,7 +59,7 @@ namespace Interlook.Text
         {
             if (ex == null)
             {
-                return String.Empty;
+                return string.Empty;
             }
             else if (deep >= maxDepth)
             {

@@ -58,13 +58,7 @@ namespace Interlook.Security
         /// <summary>
         /// Gets the element at the specified index.
         /// </summary>
-        public T this[int index]
-        {
-            get
-            {
-                return OriginalArray[index];
-            }
-        }
+        public T this[int index] => OriginalArray[index];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DisposableArray{T}"/> class
@@ -91,6 +85,13 @@ namespace Interlook.Security
             return array.GetContent();
         }
 
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
         public override bool Equals(object obj)
         {
             if (obj is DisposableBytes dis)
@@ -101,6 +102,11 @@ namespace Interlook.Security
                 return false;
         }
 
+        /// <summary>
+        /// Equalses the specified object.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <returns></returns>
         public bool Equals(DisposableArray<T> obj)
         {
             if (ReferenceEquals(this, obj))
@@ -111,6 +117,11 @@ namespace Interlook.Security
             return arraysEqual(OriginalArray, obj.OriginalArray);
         }
 
+        /// <summary>
+        /// Equalses the specified array.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <returns></returns>
         public bool Equals(T[] array)
         {
             if (ReferenceEquals(OriginalArray, array))
@@ -162,6 +173,10 @@ namespace Interlook.Security
             doDispose(true);
         }
 
+        /// <summary>
+        /// Adds a further object implementing <see cref="IDisposable"/>
+        /// </summary>
+        /// <param name="d">The d.</param>
         protected void AddAdditionalDisposable(IDisposable d) => _additionalDisposables.Add(d);
 
         /// <summary>

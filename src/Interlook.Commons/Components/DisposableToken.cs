@@ -36,11 +36,17 @@ namespace Interlook.Components
     {
         private readonly Guid _id;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DisposableToken"/> class.
+        /// </summary>
         public DisposableToken()
         {
             _id = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             DoDisposeAction();

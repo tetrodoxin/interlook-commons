@@ -73,22 +73,22 @@ namespace Interlook.Eventing
 
             if (useWeakReferences)
             {
-                this._weakReferenceAction = new WeakReference(action.Target);
-                this._actionMethod = action.Method;
+                _weakReferenceAction = new WeakReference(action.Target);
+                _actionMethod = action.Method;
                 if (filterPredicate != null)
                 {
-                    this._weakReferenceFilter = new WeakReference(filterPredicate.Target);
-                    this._predicateMethod = filterPredicate.Method;
-                    this._filterSet = true;
+                    _weakReferenceFilter = new WeakReference(filterPredicate.Target);
+                    _predicateMethod = filterPredicate.Method;
+                    _filterSet = true;
                 }
             }
             else
             {
-                this._directAction = action;
+                _directAction = action;
                 if (filterPredicate != null)
                 {
-                    this._directPredicate = filterPredicate;
-                    this._filterSet = true;
+                    _directPredicate = filterPredicate;
+                    _filterSet = true;
                 }
             }
         }
@@ -137,7 +137,7 @@ namespace Interlook.Eventing
             }
             else
             {
-                return tryGetDelegate(this._actionMethod, this._weakReferenceAction, typeof(Action<TEvent>)) as Action<TEvent>;
+                return tryGetDelegate(_actionMethod, _weakReferenceAction, typeof(Action<TEvent>)) as Action<TEvent>;
             }
         }
 
@@ -149,7 +149,7 @@ namespace Interlook.Eventing
             }
             else
             {
-                return tryGetDelegate(this._predicateMethod, this._weakReferenceFilter, typeof(Func<TEvent, bool>)) as Func<TEvent, bool>;
+                return tryGetDelegate(_predicateMethod, _weakReferenceFilter, typeof(Func<TEvent, bool>)) as Func<TEvent, bool>;
             }
         }
 
@@ -163,7 +163,7 @@ namespace Interlook.Eventing
             var pred = tryGetPredicate();
             if (pred == null)
             {
-                this._filterSet = false;
+                _filterSet = false;
                 return true;
             }
             else

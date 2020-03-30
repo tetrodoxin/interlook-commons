@@ -1,5 +1,3 @@
-using Interlook.Text;
-using System;
 using Xunit;
 
 namespace Interlook.Text.Tests
@@ -11,8 +9,8 @@ namespace Interlook.Text.Tests
         [Fact]
         public void IsNullOrEmptyPositiveTest()
         {
-            var s = String.Empty;
-            Assert.True(s.IsNullOrEmpty(), "String.Empty did not lead to true for IsNullOrEmpty().");
+            var s = string.Empty;
+            Assert.True(s.IsNullOrEmpty(), "string.Empty did not lead to true for IsNullOrEmpty().");
             s = null;
             Assert.True(s.IsNullOrEmpty(), "NULL string did not lead to true for IsNullOrEmpty().");
         }
@@ -38,8 +36,8 @@ namespace Interlook.Text.Tests
         [Fact]
         public void AintNullNorEmptyNegativeTest()
         {
-            var s = String.Empty;
-            Assert.False(s.IsNeitherNullNorEmpty(), "String.Empty lead to true for AintNullNorEmpty().");
+            var s = string.Empty;
+            Assert.False(s.IsNeitherNullNorEmpty(), "string.Empty lead to true for AintNullNorEmpty().");
             s = null;
             Assert.False(s.IsNeitherNullNorEmpty(), "NULL string lead to true for AintNullNorEmpty().");
         }
@@ -69,22 +67,11 @@ namespace Interlook.Text.Tests
         }
 
         [Fact]
-        public void TrimProtectedTest()
-        {
-            string s = null;
-            string ergebnis = s.TrimProtected();
-            Assert.Null(ergebnis);
-            Assert.Equal(String.Empty, String.Empty.TrimProtected());
-            Assert.Equal(String.Empty, "   ".TrimProtected());
-            Assert.Equal("d", "  d ".TrimProtected());
-        }
-
-        [Fact]
         public void EnsureTest()
         {
             string s = null;
             string ergebnis = s.Ensure();
-            Assert.Equal(String.Empty, ergebnis);
+            Assert.Equal(string.Empty, ergebnis);
             s = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich";
             Assert.Equal(s, s.Ensure());
             s = " ";

@@ -32,12 +32,9 @@ namespace Interlook.Components
     /// <summary>
     /// Generic class to encapsulate a method result, enriched with success(error information.
     /// </summary>
+    /// <typeparam name="T">Data type of the eccapsulated return value.</typeparam>
     public struct MethodResult<T>
     {
-        public const int CodeSuccess = 0;
-
-        public const int CodeErrorDefault = -1;
-
         #region Fields
 
         private Exception _exception;
@@ -64,7 +61,7 @@ namespace Interlook.Components
         /// <summary>
         /// Returns, if the the method result reflects an successful invocation
         /// </summary>
-        public bool IsSuccess => ReturnCode == CodeSuccess;
+        public bool IsSuccess => ReturnCode == MethodResult.CodeSuccess;
 
         #endregion Properties
 
@@ -115,7 +112,7 @@ namespace Interlook.Components
 
         private static bool checkSuccess(MethodResult<T> result)
         {
-            return result.ReturnCode == MethodResult.CODE_SUCCESS;
+            return result.ReturnCode == MethodResult.CodeSuccess;
         }
 
         #endregion Private Methods
@@ -129,7 +126,7 @@ namespace Interlook.Components
         /// <returns>A new instance of the closed generic result with data.</returns>
         public static MethodResult<T> CreateSuccess(T result)
         {
-            return new MethodResult<T>(result, MethodResult.CODE_SUCCESS, String.Empty, null);
+            return new MethodResult<T>(result, MethodResult.CodeSuccess, string.Empty, null);
         }
 
         /// <summary>
@@ -139,9 +136,9 @@ namespace Interlook.Components
         /// <returns>A new instance of the closed generic result with error code.</returns>
         public static MethodResult<T> CreateFailed(int errorCode)
         {
-            if (errorCode == MethodResult.CODE_SUCCESS) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
+            if (errorCode == MethodResult.CodeSuccess) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
 
-            return new MethodResult<T>(default(T), errorCode, String.Empty, null);
+            return new MethodResult<T>(default(T), errorCode, string.Empty, null);
         }
 
         /// <summary>
@@ -151,7 +148,7 @@ namespace Interlook.Components
         /// <returns>A new instance of the closed generic result with error message.</returns>
         public static MethodResult<T> CreateFailed(string errorMessage)
         {
-            return new MethodResult<T>(default(T), MethodResult.CODE_ERROR_DEFAULT, errorMessage, null);
+            return new MethodResult<T>(default(T), MethodResult.CodeErrorDefault, errorMessage, null);
         }
 
         /// <summary>
@@ -163,13 +160,13 @@ namespace Interlook.Components
         {
             if (ex != null)
             {
-                var r = CreateFailed(MethodResult.CODE_ERROR_DEFAULT, ex.Message);
+                var r = CreateFailed(MethodResult.CodeErrorDefault, ex.Message);
                 r._exception = ex;
                 return r;
             }
             else
             {
-                return CreateFailed(MethodResult.CODE_ERROR_DEFAULT, String.Empty);
+                return CreateFailed(MethodResult.CodeErrorDefault, string.Empty);
             }
         }
 
@@ -181,7 +178,7 @@ namespace Interlook.Components
         /// <returns>A new instance of the closed generic result with error code and message.</returns>
         public static MethodResult<T> CreateFailed(int errorCode, string errorMessage)
         {
-            if (errorCode == MethodResult.CODE_SUCCESS) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
+            if (errorCode == MethodResult.CodeSuccess) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
 
             var r = new MethodResult<T>(default(T), errorCode, errorMessage, null);
             r.ReturnCode = errorCode;
@@ -198,49 +195,68 @@ namespace Interlook.Components
         /// <returns>A new instance of the closed generic result with error code and exception.</returns>
         public static MethodResult<T> CreateFailed(int errorCode, Exception ex)
         {
-            if (errorCode == MethodResult.CODE_SUCCESS) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
+            if (errorCode == MethodResult.CodeSuccess) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
 
             return ex != null
                 ? new MethodResult<T>(default(T), errorCode, ex.Message, ex)
-                : new MethodResult<T>(default(T), errorCode, String.Empty, null);
+                : new MethodResult<T>(default(T), errorCode, string.Empty, null);
         }
 
         #endregion Static Factory Methods
 
         #region Implicit Cast Operators
 
-        public static implicit operator T(MethodResult<T> result)
-        {
-            return result.Result;
-        }
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MethodResult{T}"/> to <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator T(MethodResult<T> result) => result.Result;
 
-        public static implicit operator MethodResult<T>(T parameter)
-        {
-            return CreateSuccess(parameter);
-        }
+        /// <summary>
+        /// Performs an implicit conversion from <typeparamref name="T"/> to <see cref="MethodResult{T}"/>.
+        /// </summary>
+        /// <param name="parameter">The parameter.</param>
+        /// <returns>
+        /// A <see cref="MethodResult{T}"/> instance, representing a successfull
+        /// method invocation with a result of type <typeparamref name="T"/>
+        /// </returns>
+        public static implicit operator MethodResult<T>(T parameter) => CreateSuccess(parameter);
 
-        public static implicit operator bool(MethodResult<T> result)
-        {
-            return checkSuccess(result);
-        }
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MethodResult{T}"/> to <see cref="bool"/>.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>
+        /// A <see cref="bool"/> value indicating, if the method result encapsulates a successful invocation.
+        /// </returns>
+        public static implicit operator bool(MethodResult<T> result) => checkSuccess(result);
 
-        public static implicit operator MethodResult(MethodResult<T> result)
-        {
-            var r = new MethodResult(result.Result, result.ReturnCode, result.ReturnMessage, null);
-            return r;
-        }
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MethodResult{T}"/> to a non-generic <see cref="MethodResult"/>.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>
+        /// The non-generic version of <paramref name="result"/>.
+        /// </returns>
+        public static implicit operator MethodResult(MethodResult<T> result) => new MethodResult(result.Result, result.ReturnCode, result.ReturnMessage, null);
 
-        public static implicit operator MethodResult<T>(MethodResult result)
-        {
-            if (result.Result is T)
-            {
-                return CreateSuccess((T)result.Result);
-            }
-            else
-            {
-                return CreateFailed(result.ReturnCode, result.ReturnMessage);
-            }
-        }
+        /// <summary>
+        /// Tries to perform an implicit conversion from non-generic <see cref="MethodResult"/> to the generic <see cref="MethodResult{T}"/>.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>
+        /// An generic version of <paramref name="result"/>. 
+        /// <para>
+        /// Notice, that an instance of <see cref="MethodResult"/>, actually
+        /// representing a success will be converted to a failed generic representation, if the <see cref="MethodResult.Result"/>
+        /// property of <paramref name="result"/> was not of type <typeparamref name="T"/> (which is also the case for <c>null</c>)
+        /// </para>
+        /// </returns>
+        public static implicit operator MethodResult<T>(MethodResult result) 
+            => result.Result is T && result.ReturnCode == MethodResult.CodeSuccess ? CreateSuccess((T)result.Result) : CreateFailed(result.ReturnCode, result.ReturnMessage);
 
         #endregion Implicit Cast Operators
     }

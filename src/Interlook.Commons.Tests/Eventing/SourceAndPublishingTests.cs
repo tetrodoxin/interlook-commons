@@ -54,7 +54,7 @@ namespace Interlook.Eventing.Tests
         [Fact]
         public void PublishedEventHandledSpecificEventTest()
         {
-            var result = String.Empty;
+            var result = string.Empty;
             var original = "Event";
             var delta = "_Raised";
 

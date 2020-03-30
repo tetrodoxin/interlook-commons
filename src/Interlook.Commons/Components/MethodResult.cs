@@ -36,8 +36,15 @@ namespace Interlook.Components
     {
         #region Constants
 
-        public const int CODE_SUCCESS = 0;
-        public const int CODE_ERROR_DEFAULT = -1;
+        /// <summary>
+        /// The code for a successful method call
+        /// </summary>
+        public const int CodeSuccess = 0;
+
+        /// <summary>
+        /// The default code for an error.
+        /// </summary>
+        public const int CodeErrorDefault = -1;
 
         #endregion Constants
 
@@ -113,7 +120,7 @@ namespace Interlook.Components
 
         private static bool checkSuccess(MethodResult result)
         {
-            return result.ReturnCode == CODE_SUCCESS;
+            return result.ReturnCode == CodeSuccess;
         }
 
         #endregion Private Methods
@@ -124,31 +131,27 @@ namespace Interlook.Components
         /// Creates a success result without content.
         /// </summary>
         /// <returns>A new instance of the closed generic result without data.</returns>
-        public static MethodResult CreateSuccess()
-        {
-            return new MethodResult(null, CODE_SUCCESS, String.Empty, null);
-        }
+        public static MethodResult CreateSuccess() => new MethodResult(null, CodeSuccess, string.Empty, null);
 
         /// <summary>
         /// Creates a success result with content.
         /// </summary>
         /// <param name="result">The actual result.</param>
         /// <returns>A new instance of the result with data.</returns>
-        public static MethodResult CreateSuccess(object result)
-        {
-            return new MethodResult(result, CODE_SUCCESS, String.Empty, null);
-        }
+        public static MethodResult CreateSuccess(object result) => new MethodResult(result, CodeSuccess, string.Empty, null);
 
         /// <summary>
         /// Creates a failure result with error code.
         /// </summary>
         /// <param name="errorCode">Error code.</param>
         /// <returns>A new instance of the result with error code.</returns>
+        /// <exception cref="ArgumentException">If <paramref name="errorCode"/> was set to <see cref="CodeSuccess"/>,
+        /// which is reserved for successful invocations.</exception>
         public static MethodResult CreateFailed(int errorCode)
         {
-            if (errorCode == CODE_SUCCESS) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
+            if (errorCode == CodeSuccess) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
 
-            return new MethodResult(null, errorCode, String.Empty, null);
+            return new MethodResult(null, errorCode, string.Empty, null);
         }
 
         /// <summary>
@@ -156,27 +159,17 @@ namespace Interlook.Components
         /// </summary>
         /// <param name="errorMessage">The error message.</param>
         /// <returns>A new instance of the result with error message.</returns>
-        public static MethodResult CreateFailed(string errorMessage)
-        {
-            return new MethodResult(null, CODE_ERROR_DEFAULT, errorMessage, null);
-        }
+        public static MethodResult CreateFailed(string errorMessage) => new MethodResult(null, CodeErrorDefault, errorMessage, null);
 
         /// <summary>
         /// Creates a failure result with specified exception.
         /// </summary>
         /// <param name="ex">The exception to throw on <see cref="ThrowOnError()"/>.</param>
         /// <returns>A new instance of the result with specified exception.</returns>
-        public static MethodResult CreateFailed(Exception ex)
-        {
-            if (ex != null)
-            {
-                return new MethodResult(null, CODE_ERROR_DEFAULT, ex.Message, ex);
-            }
-            else
-            {
-                return new MethodResult(null, CODE_ERROR_DEFAULT, String.Empty, null);
-            }
-        }
+        public static MethodResult CreateFailed(Exception ex) 
+            => ex != null
+                ? new MethodResult(null, CodeErrorDefault, ex.Message, ex)
+                : new MethodResult(null, CodeErrorDefault, string.Empty, null);
 
         /// <summary>
         /// Creates a failure result with error code and message.
@@ -184,11 +177,7 @@ namespace Interlook.Components
         /// <param name="errorCode">The error code.</param>
         /// <param name="errorMessage">The error message.</param>
         /// <returns>A new instance of the result with error code and message.</returns>
-        public static MethodResult CreateFailed(int errorCode, string errorMessage)
-        {
-            return new MethodResult(null, errorCode, errorMessage, null);
-
-        }
+        public static MethodResult CreateFailed(int errorCode, string errorMessage) => new MethodResult(null, errorCode, errorMessage, null);
 
         /// <summary>
         /// Creates a failure result with error code and specified exception.
@@ -196,26 +185,21 @@ namespace Interlook.Components
         /// <param name="errorCode">The error code.</param>
         /// <param name="ex">The exception to throw on <see cref="ThrowOnError()"/>.</param>
         /// <returns>A new instance of the closed generic result with error code and exception.</returns>
-        public static MethodResult CreateFailed(int errorCode, Exception ex)
-        {
-            if (ex != null)
-            {
-                return new MethodResult(null, errorCode, ex.Message, ex);
-            }
-            else
-            {
-                return new MethodResult(null, errorCode, String.Empty, null);
-            }
-        }
+        public static MethodResult CreateFailed(int errorCode, Exception ex) 
+            => ex != null ? new MethodResult(null, errorCode, ex.Message, ex) : new MethodResult(null, errorCode, string.Empty, null);
 
         #endregion Static Factory Methods
 
         #region Implicit Cast Operators
 
-        public static implicit operator bool(MethodResult result)
-        {
-            return checkSuccess(result);
-        }
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MethodResult"/> to <see cref="bool"/>.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>
+        /// A <see cref="bool"/> value indicating, if the method result encapsulates a successful invocation.
+        /// </returns>
+        public static implicit operator bool(MethodResult result) => checkSuccess(result);
 
         #endregion Implicit Cast Operators
     }

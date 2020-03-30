@@ -21,7 +21,7 @@ namespace Interlook.Components.Tests
         {
             var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
 
-            Assert.Equal(MethodResult.CODE_SUCCESS, actual.ReturnCode);
+            Assert.Equal(MethodResult.CodeSuccess, actual.ReturnCode);
             Assert.Equal<MethodResultTestObject>(SuccessObject, actual.Result);
         }
 
@@ -38,7 +38,7 @@ namespace Interlook.Components.Tests
             var actual = MethodResult<MethodResultTestObject>.CreateFailed(ErrorMessage);
 
             Assert.Equal(ErrorMessage, actual.ReturnMessage);
-            Assert.NotEqual(MethodResult.CODE_SUCCESS, actual.ReturnCode);
+            Assert.NotEqual(MethodResult.CodeSuccess, actual.ReturnCode);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace Interlook.Components.Tests
             MethodResult mr;
             mr = actual;
 
-            Assert.Equal(MethodResult.CODE_SUCCESS, mr.ReturnCode);
+            Assert.Equal(MethodResult.CodeSuccess, mr.ReturnCode);
             Assert.Equal<MethodResultTestObject>(SuccessObject, mr.Result as MethodResultTestObject);
         }
 
@@ -132,7 +132,7 @@ namespace Interlook.Components.Tests
             var actual = MethodResult<MethodResultTestObject>.CreateSuccess(SuccessObject);
             var mr = (MethodResult)actual;
 
-            Assert.Equal(MethodResult.CODE_SUCCESS, mr.ReturnCode);
+            Assert.Equal(MethodResult.CodeSuccess, mr.ReturnCode);
             Assert.Equal<MethodResultTestObject>(SuccessObject, mr.Result as MethodResultTestObject);
         }
 

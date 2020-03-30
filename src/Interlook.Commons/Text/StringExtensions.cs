@@ -92,7 +92,7 @@ namespace Interlook.Text
         /// <returns>A string with a guaranteed upper case first character.</returns>
         public static string CapitalizedFirstCharacter(this string str, bool forceLowercaseRemainder = false)
         {
-            string result = String.Empty;
+            string result = string.Empty;
             if (!String.IsNullOrEmpty(str))
             {
                 result = str.Substring(0, 1).ToUpper();

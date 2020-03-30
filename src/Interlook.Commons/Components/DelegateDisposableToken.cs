@@ -46,6 +46,10 @@ namespace Interlook.Components
             _action = action;
         }
 
+        /// <summary>
+        /// Action, that is performed, when object is disposing
+        /// just before <see cref="GC.SuppressFinalize(object)" /> is called.
+        /// </summary>
         protected override void DoDisposeAction()
         {
             if (_action != null)

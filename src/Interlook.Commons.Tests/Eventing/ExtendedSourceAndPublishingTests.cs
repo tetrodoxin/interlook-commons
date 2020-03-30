@@ -1,8 +1,5 @@
 ﻿using System;
-using Interlook.Eventing;
-using Interlook.Eventing.Tests;
 using Xunit;
-using Xunit.Extensions;
 
 namespace Interlook.Eventing.Tests
 {
@@ -57,7 +54,7 @@ namespace Interlook.Eventing.Tests
         [Fact]
         public void PublishedEventHandledSpecificEventTest()
         {
-            var result = String.Empty;
+            var result = string.Empty;
             var original = "Event";
             var delta = "_Raised";
 
@@ -188,67 +185,6 @@ namespace Interlook.Eventing.Tests
             ev = new TestEvent(original);
             EventBus.Publish(ev);
             Assert.Equal(original, ev.Data);
-        }
-
-        [Fact]
-        public void IsWeakDelegateGettingGarbageCollectedTest()
-        {
-            var wasHandled = false;
-
-            var subscriber = new TestEventWeakDelegateSubscriberObject(p => wasHandled = true);
-            subscriber.Subscribe(EventBus);
-
-            EventBus.Publish(new TestEvent(null));
-            Assert.True(wasHandled, "Registered delegate was not invoked.");
-
-            wasHandled = false;
-            subscriber = null;
-            GC.Collect();       // force garbage collection
-
-            EventBus.Publish(new TestEvent(null));
-            Assert.False(wasHandled, "Registered delegate was still invoked, although set to null with forced garbage collection.");
-        }
-
-        [Fact]
-        public void IsWeakHandlerGettingGarbageCollectedTest()
-        {
-            var original = "start";
-            var delta = "_tested";
-            var handler = new StringAppendingTestEventHandler(delta);
-
-            var weakDelegate = new WeakReference(handler);
-
-            EventBus.RegisterHandlerFor<TestEvent>(handler, true);
-
-            handler = null;
-            GC.Collect();       // force garbage collection
-
-            Assert.False(weakDelegate.IsAlive, "Delegate has not been garbage collected.");
-
-            var ev = new TestEvent(original);
-            EventBus.Publish(ev);
-
-            Assert.Equal(original, ev.Data);
-        }
-
-        [Fact]
-        public void IsWeakFilteredDelegateGettingGarbageCollectedTest()
-        {
-            var wasHandled = false;
-            var correctData = "correct";
-
-            var subscriber = new TestEventWeakDelegateSubscriberObject(p => wasHandled = true);
-            subscriber.Subscribe(EventBus, p => correctData.Equals(p.Data));
-
-            EventBus.Publish(new TestEvent(correctData));
-            Assert.True(wasHandled, "Registered delegate was not invoked.");
-
-            wasHandled = false;
-            subscriber = null;
-            GC.Collect();       // force garbage collection
-
-            EventBus.Publish(new TestEvent(correctData));
-            Assert.False(wasHandled, "Registered delegate was still invoked, although set to null with forced garbage collection.");
         }
     }
 }
