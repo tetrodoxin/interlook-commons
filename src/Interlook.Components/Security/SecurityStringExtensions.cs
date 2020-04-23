@@ -24,8 +24,6 @@
 
 #endregion 
 using Interlook.Security;
-using Interlook.Text;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -66,20 +64,20 @@ namespace System.Security
             string result = null;
             if (password != null)
             {
-                int passwordLength = password.Length;
-                if (salt.IsNeitherNullNorEmpty())
-                {
-                    passwordLength += salt.Length;
-                }
+                bool hasSalt = !string.IsNullOrEmpty(salt);
 
-                char[] passwordChars = new char[passwordLength];    // unfortunately byte array is managed too :-(
+                int passwordLength = hasSalt
+                    ? password.Length
+                    : password.Length + salt.Length;
+
+                var passwordChars = new char[passwordLength];    // unfortunately byte array is managed too :-(
 
                 // Copy the password from SecureString to our char array
                 IntPtr passwortPointer = Marshal.SecureStringToBSTR(password);
                 Marshal.Copy(passwortPointer, passwordChars, 0, passwordLength);
                 Marshal.ZeroFreeBSTR(passwortPointer);
 
-                if (salt.IsNeitherNullNorEmpty())
+                if (hasSalt)
                 {
                     Array.Copy(salt.ToArray(), 0, passwordChars, password.Length, salt.Length);
                 }

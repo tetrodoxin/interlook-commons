@@ -26,7 +26,6 @@
 #if NET451PLUS
 
 using System;
-using Interlook.Monads;
 
 namespace System.Collections.Generic
 {
@@ -89,32 +88,6 @@ namespace System.Collections.Generic
         public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
         {
             return GetValueOrDefault(dictionary, key, default);
-        }
-
-        /// <summary>
-        /// Gets the value associated with the specified key of a dictionary
-        /// as a <see cref="Maybe{T}"/> instance.
-        /// </summary>
-        /// <typeparam name="TKey">Type of the keys of the dictionary.</typeparam>
-        /// <typeparam name="TValue">Type of the values of the dictionary.</typeparam>
-        /// <param name="dictionary">A dictionary.</param>
-        /// <param name="key">The key of the value to get.</param>
-        /// <returns>
-        /// A <see cref="Maybe{T}"/> instance, containing the associated value as <see cref="Just{T}"/>,
-        /// if the key was found in the dictionary; in all other cases <see cref="Nothing{T}"/>
-        /// </returns>
-        public static Maybe<TValue> GetValueMaybe<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
-        {
-            if (dictionary != null)
-            {
-                TValue val;
-                if (dictionary.TryGetValue(key, out val))
-                {
-                    return new Just<TValue>(val);
-                }
-            }
-
-            return new Nothing<TValue>();
         }
 
         /// <summary>

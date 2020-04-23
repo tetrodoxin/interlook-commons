@@ -22,10 +22,11 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
+
 using System.Text;
-using Interlook.Text;
 
 namespace Interlook.Components
 {
@@ -50,7 +51,7 @@ namespace Interlook.Components
 
         #region Fields
 
-        private Exception _exception;
+        private readonly Exception _exception;
 
         #endregion Fields
 
@@ -59,17 +60,17 @@ namespace Interlook.Components
         /// <summary>
         /// The actual result.
         /// </summary>
-        public object Result { get; private set; }
+        public object Result { get; }
 
         /// <summary>
         /// An error message.
         /// </summary>
-        public string ReturnMessage { get; private set; }
+        public string ReturnMessage { get; }
 
         /// <summary>
         /// Code to qualify the type of result (error, success)
         /// </summary>
-        public int ReturnCode { get; private set; }
+        public int ReturnCode { get; }
 
         #endregion Properties
 
@@ -78,10 +79,10 @@ namespace Interlook.Components
         internal MethodResult(object result, int returnCode, string returnMessage, Exception exception)
             : this()
         {
-            this.Result = result;
-            this.ReturnCode = returnCode;
-            this.ReturnMessage = returnMessage;
-            this._exception = exception;
+            Result = result;
+            ReturnCode = returnCode;
+            ReturnMessage = returnMessage;
+            _exception = exception;
         }
 
         #endregion Constructors
@@ -101,12 +102,12 @@ namespace Interlook.Components
                 }
                 else
                 {
-                    StringBuilder sb = new StringBuilder("Method Failed. ")
-                        .AppendFormat("Return code = {0}", this.ReturnCode);
+                    var sb = new StringBuilder("Method Failed. ")
+                        .Append($"Return code = {ReturnCode}");
 
-                    if (this.ReturnMessage.IsNeitherNullNorEmpty())
+                    if (!string.IsNullOrEmpty(ReturnMessage))
                     {
-                        sb.AppendFormat(", Return message = '{0}'", this.ReturnMessage);
+                        sb.Append($", Return message = '{ReturnMessage}'");
                     }
 
                     throw new Exception(sb.ToString());
@@ -118,10 +119,7 @@ namespace Interlook.Components
 
         #region Private Methods
 
-        private static bool checkSuccess(MethodResult result)
-        {
-            return result.ReturnCode == CodeSuccess;
-        }
+        private static bool checkSuccess(MethodResult result) => result.ReturnCode == CodeSuccess;
 
         #endregion Private Methods
 
@@ -166,7 +164,7 @@ namespace Interlook.Components
         /// </summary>
         /// <param name="ex">The exception to throw on <see cref="ThrowOnError()"/>.</param>
         /// <returns>A new instance of the result with specified exception.</returns>
-        public static MethodResult CreateFailed(Exception ex) 
+        public static MethodResult CreateFailed(Exception ex)
             => ex != null
                 ? new MethodResult(null, CodeErrorDefault, ex.Message, ex)
                 : new MethodResult(null, CodeErrorDefault, string.Empty, null);
@@ -185,7 +183,7 @@ namespace Interlook.Components
         /// <param name="errorCode">The error code.</param>
         /// <param name="ex">The exception to throw on <see cref="ThrowOnError()"/>.</param>
         /// <returns>A new instance of the closed generic result with error code and exception.</returns>
-        public static MethodResult CreateFailed(int errorCode, Exception ex) 
+        public static MethodResult CreateFailed(int errorCode, Exception ex)
             => ex != null ? new MethodResult(null, errorCode, ex.Message, ex) : new MethodResult(null, errorCode, string.Empty, null);
 
         #endregion Static Factory Methods

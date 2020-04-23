@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net451;net472;netcoreapp2.1;netstandard2.0</TargetFrameworks>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyVersion>1.7.0.0</AssemblyVersion>
+    <FileVersion>1.7.0.0</FileVersion>
+    <Version>1.7.0</Version>
+    <Company>Andreas H.</Company>
+    <Description>Some extensions for functional programming with csharp, including monads like:
+- Maybe
+- Either
+- Reader
+- Writer
+- Try
+
+Moreover includes some extension methods for combining/composing/currying functions.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>2013-2020 tetrodoxin</Copyright>
+    <RepositoryUrl>https://github.com/tetrodoxin/interlook-commons.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/tetrodoxin/interlook-commons</PackageProjectUrl>
+    <PackageTags>general, csharp, library, extension, functional, monads, either, maybe, curry</PackageTags>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <Authors>Andreas H.</Authors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp2.1'">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCORE21</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net451'">
+    <DefineConstants>$(DefineConstants);NET451</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net472'">
+    <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET472</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+</Project>

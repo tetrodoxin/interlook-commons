@@ -22,8 +22,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -75,7 +77,7 @@ namespace Interlook.Monads
         }
 
         /// <summary>
-        /// Returns, in overriding classes, the left value. 
+        /// Returns, in overriding classes, the left value.
         /// Throws an exception, if the instance is not in left state.
         /// </summary>
         protected abstract TLeft GetLeftInternal();
@@ -146,7 +148,7 @@ namespace Interlook.Monads
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode() => _valueHash;
 
@@ -225,7 +227,7 @@ namespace Interlook.Monads
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode() => _valueHash;
 
@@ -245,7 +247,7 @@ namespace Interlook.Monads
         /// <typeparam name="TRightResult">The right type of the result.</typeparam>
         /// <param name="func">The function to bind.</param>
         /// <returns>A new <see cref="Left{TLeft, TRight}"/> with the original left value.</returns>
-        protected internal override Either<TLeft, TRightResult> BindInternal<TRightResult>(Func<TRight, Either<TLeft, TRightResult>> func) 
+        protected internal override Either<TLeft, TRightResult> BindInternal<TRightResult>(Func<TRight, Either<TLeft, TRightResult>> func)
             => new Left<TLeft, TRightResult>(_value);
     }
 
@@ -464,5 +466,54 @@ namespace Interlook.Monads
 
             return either.IsLeft ? leftFunction(either.GetLeft()) : rightFunction(either.GetRight());
         }
+
+        /// <summary>
+        /// Creates a new <see cref="Right{Exception, TRight}"/> instance
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The right value.</param>
+        public static Either<Exception, TRight> ToExceptionEither<TRight>(this TRight value)
+            => new Right<Exception, TRight>(value);
+
+        /// <summary>
+        /// Creates a new <see cref="Right{String, TRight}"/> instance
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The right value.</param>
+        public static Either<string, TRight> ToStringEither<TRight>(this TRight value)
+            => new Right<string, TRight>(value);
+
+        /// <summary>
+        /// Creates a new <see cref="Right{T, T}"/> instance
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The right value.</param>
+        public static Either<TRight, TRight> ToEitherRight<TRight>(this TRight value)
+            => new Right<TRight, TRight>(value);
+
+        /// <summary>
+        /// Creates a new <see cref="Right{TLeft, TRight}"/> instance
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The right value.</param>
+        /// <param name="dummyLeft">Unused parameter just for type inference</param>
+        public static Either<TLeft, TRight> ToEitherRight<TLeft, TRight>(this TRight value, TLeft dummyLeft) => new Right<TLeft, TRight>(value);
+
+        /// <summary>
+        /// Creates a new <see cref="Left{TLeft, TRight}"/> instance
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="value">The left value.</param>
+        /// <param name="dummyRight">Unused parameter just for type inference</param>
+        public static Either<TLeft, TRight> ToEitherLeft<TLeft, TRight>(this TLeft value, TRight dummyRight) => new Left<TLeft, TRight>(value);
+
+        /// <summary>
+        /// Creates a new <see cref="Left{TLeft, TLeft}"/> instance
+        /// </summary>
+        /// <typeparam name="TLeft">The left type.</typeparam>
+        /// <param name="value">The left value.</param>
+        public static Either<TLeft, TLeft> ToEitherLeft<TLeft>(this TLeft value) => new Left<TLeft, TLeft>(value);
     }
 }

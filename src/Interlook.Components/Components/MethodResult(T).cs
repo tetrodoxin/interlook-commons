@@ -22,10 +22,11 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
+
 using System.Text;
-using Interlook.Text;
 
 namespace Interlook.Components
 {
@@ -37,7 +38,7 @@ namespace Interlook.Components
     {
         #region Fields
 
-        private Exception _exception;
+        private readonly Exception _exception;
 
         #endregion Fields
 
@@ -46,17 +47,17 @@ namespace Interlook.Components
         /// <summary>
         /// The actual result.
         /// </summary>
-        public T Result { get; private set; }
+        public T Result { get; }
 
         /// <summary>
         /// An error message.
         /// </summary>
-        public string ReturnMessage { get; private set; }
+        public string ReturnMessage { get; }
 
         /// <summary>
         /// Code to qualify the type of result (error, success)
         /// </summary>
-        public int ReturnCode { get; private set; }
+        public int ReturnCode { get; }
 
         /// <summary>
         /// Returns, if the the method result reflects an successful invocation
@@ -70,10 +71,10 @@ namespace Interlook.Components
         internal MethodResult(T result, int returnCode, string returnMessage, Exception exception)
             : this()
         {
-            this.Result = result;
-            this.ReturnCode = returnCode;
-            this.ReturnMessage = returnMessage;
-            this._exception = exception;
+            Result = result;
+            ReturnCode = returnCode;
+            ReturnMessage = returnMessage;
+            _exception = exception;
         }
 
         #endregion Constructors
@@ -94,11 +95,11 @@ namespace Interlook.Components
                 else
                 {
                     StringBuilder sb = new StringBuilder("Method Failed. ")
-                        .AppendFormat("Return code = {0}", this.ReturnCode);
+                        .Append($"Return code = {ReturnCode}");
 
-                    if (this.ReturnMessage.IsNeitherNullNorEmpty())
+                    if (!string.IsNullOrEmpty(ReturnMessage))
                     {
-                        sb.AppendFormat(", Return message = '{0}'", this.ReturnMessage);
+                        sb.Append($", Return message = '{ReturnMessage}'");
                     }
 
                     throw new Exception(sb.ToString());
@@ -110,10 +111,7 @@ namespace Interlook.Components
 
         #region Private Methods
 
-        private static bool checkSuccess(MethodResult<T> result)
-        {
-            return result.ReturnCode == MethodResult.CodeSuccess;
-        }
+        private static bool checkSuccess(MethodResult<T> result) => result.ReturnCode == MethodResult.CodeSuccess;
 
         #endregion Private Methods
 
@@ -146,29 +144,17 @@ namespace Interlook.Components
         /// </summary>
         /// <param name="errorMessage">The error message.</param>
         /// <returns>A new instance of the closed generic result with error message.</returns>
-        public static MethodResult<T> CreateFailed(string errorMessage)
-        {
-            return new MethodResult<T>(default(T), MethodResult.CodeErrorDefault, errorMessage, null);
-        }
+        public static MethodResult<T> CreateFailed(string errorMessage) => new MethodResult<T>(default, MethodResult.CodeErrorDefault, errorMessage, null);
 
         /// <summary>
         /// Creates a failure result with specified exception.
         /// </summary>
         /// <param name="ex">The exception to throw on <see cref="ThrowOnError()"/>.</param>
         /// <returns>A new instance of the closed generic result with specified exception.</returns>
-        public static MethodResult<T> CreateFailed(Exception ex)
-        {
-            if (ex != null)
-            {
-                var r = CreateFailed(MethodResult.CodeErrorDefault, ex.Message);
-                r._exception = ex;
-                return r;
-            }
-            else
-            {
-                return CreateFailed(MethodResult.CodeErrorDefault, string.Empty);
-            }
-        }
+        public static MethodResult<T> CreateFailed(Exception ex) 
+            => ex != null
+                ? (MethodResult<T>)new MethodResult(default, MethodResult.CodeErrorDefault, ex.Message, ex)
+                : CreateFailed(MethodResult.CodeErrorDefault, string.Empty);
 
         /// <summary>
         /// Creates a failure result with error code and message.
@@ -180,11 +166,8 @@ namespace Interlook.Components
         {
             if (errorCode == MethodResult.CodeSuccess) throw new ArgumentException("This code is reserved for success", nameof(errorCode));
 
-            var r = new MethodResult<T>(default(T), errorCode, errorMessage, null);
-            r.ReturnCode = errorCode;
-            r.ReturnMessage = errorMessage;
 
-            return r;
+            return new MethodResult<T>(default(T), errorCode, errorMessage, null);
         }
 
         /// <summary>
@@ -248,14 +231,14 @@ namespace Interlook.Components
         /// </summary>
         /// <param name="result">The result.</param>
         /// <returns>
-        /// An generic version of <paramref name="result"/>. 
+        /// An generic version of <paramref name="result"/>.
         /// <para>
         /// Notice, that an instance of <see cref="MethodResult"/>, actually
         /// representing a success will be converted to a failed generic representation, if the <see cref="MethodResult.Result"/>
         /// property of <paramref name="result"/> was not of type <typeparamref name="T"/> (which is also the case for <c>null</c>)
         /// </para>
         /// </returns>
-        public static implicit operator MethodResult<T>(MethodResult result) 
+        public static implicit operator MethodResult<T>(MethodResult result)
             => result.Result is T && result.ReturnCode == MethodResult.CodeSuccess ? CreateSuccess((T)result.Result) : CreateFailed(result.ReturnCode, result.ReturnMessage);
 
         #endregion Implicit Cast Operators

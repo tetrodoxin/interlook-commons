@@ -25,6 +25,8 @@
 #endregion license
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Interlook.Monads
 {
@@ -240,6 +242,79 @@ namespace Interlook.Monads
                 {
                     return new Failure<TResult>(ex);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Converts the <see cref="Try{TResult}"/> into an <see cref="Maybe{TResult}"/> instance,
+        /// according to the state of the encapsulated call.
+        /// </summary>
+        /// <typeparam name="TResult">The result type of the encapsulated call</typeparam>
+        /// <param name="tryM">The try-object.</param>
+        /// <returns>An instance of <see cref="Just{TResult}"/>, if <paramref name="tryM"/> encapsulated
+        /// a successful invocation and a corresponding result; otherwise <see cref="Nothing{TResult}"/></returns>
+        public static Maybe<TResult> ToMaybe<TResult>(this Try<TResult> tryM)
+            => tryM.MapTry(succ => succ.ToMaybe(), _ => Nothing<TResult>.Instance);
+
+        /// <summary>
+        /// Converts the <see cref="Try{TResult}"/> into an <see cref="Either{Exception, TResult}"/> instance,
+        /// according to the state of the encapsulated call.
+        /// </summary>
+        /// <typeparam name="TResult">The result type of the encapsulated call</typeparam>
+        /// <param name="tryM">The try-object.</param>
+        /// <returns>An instance of <see cref="Right{Exception, TResult}"/>, if <paramref name="tryM"/> encapsulated
+        /// a successful invocation and a corresponding result;
+        /// otherwise <see cref="Left{Exception, TResult}"/> including the occured exception</returns>
+        public static Either<Exception, TResult> ToExceptionEither<TResult>(this Try<TResult> tryM)
+            => tryM.MapTry(
+                succ => succ.ToExceptionEither(),
+                error => Either.Left<Exception, TResult>(error is Exception ex ? ex : new Exception(error?.ToString() ?? string.Empty)));
+
+        /// <summary>
+        /// Converts the <see cref="Try{TResult}"/> into an <see cref="Either{Exception, TResult}"/> instance,
+        /// according to the state of the encapsulated call.
+        /// </summary>
+        /// <typeparam name="TResult">The result type of the encapsulated call</typeparam>
+        /// <param name="tryM">The try-object.</param>
+        /// <returns>An instance of <see cref="Right{String, TResult}"/>, if <paramref name="tryM"/> encapsulated
+        /// a successful invocation and a corresponding result;
+        /// otherwise <see cref="Left{String, TResult}"/> including the text of the occured exception</returns>
+        public static Either<string, TResult> ToStringEither<TResult>(this Try<TResult> tryM)
+            => tryM.MapTry(
+                succ => succ.ToStringEither(),
+                error => Either.Left<string, TResult>(
+                    error is Exception ex
+                        ? exceptionString(ex, new List<Exception>(), 0, 10)
+                        : error?.ToString() ?? string.Empty));
+
+        private static string exceptionString(Exception ex, IList<Exception> traversed, int deep, int maxDepth)
+        {
+            if (ex == null)
+            {
+                return string.Empty;
+            }
+            else if (deep >= maxDepth)
+            {
+                return "Reached max recursion depth for inner exceptions.";
+            }
+            else
+            {
+                var sb = new StringBuilder();
+
+                sb.AppendLine(ex.ToString());
+                traversed.Add(ex);
+                if (ex.InnerException != null && ex != ex.InnerException && !traversed.Contains(ex))
+                {
+                    var inner = exceptionString(ex.InnerException, traversed, deep + 1, maxDepth);
+                    if (!string.IsNullOrEmpty(inner))
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine("---INNER EXCEPTION:");
+                        sb.AppendLine(inner);
+                    }
+                }
+
+                return sb.ToString();
             }
         }
     }

@@ -1,6 +1,10 @@
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
-[Bb]in/
-[Oo]bj/
+
+src/*/[Bb]in/
+src/*/[Oo]bj/
+
+tests/*/[Bb]in/
+tests/*/[Oo]bj/
 
 # mstest test results
 TestResults
@@ -39,9 +43,9 @@ x64/
 .builds
 .vs/*
 /bin/*
-lib/*/*
-!lib/repositories.config
-!lib/.gitignore
+packages/*
+!packages/repositories.config
+!packages/.gitignore
 /.nuget/*
 
 # Visual C++ cache files
