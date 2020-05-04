@@ -2,19 +2,21 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451;net472;netcoreapp2.1;netstandard2.0</TargetFrameworks>
-  <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AssemblyVersion>1.7.0.0</AssemblyVersion>
-    <FileVersion>1.7.0.0</FileVersion>
-    <Version>1.7.0</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <LangVersion>Latest</LangVersion>
+    <AssemblyVersion>1.7.3.0</AssemblyVersion>
+    <FileVersion>1.7.3.0</FileVersion>
+    <Version>1.7.3</Version>
     <Company>Andreas H.</Company>
     <Description>Some extensions for functional programming with csharp, including monads like:
-- Maybe
-- Either
-- Reader
-- Writer
-- Try
+      - Maybe
+      - Either
+      - Reader
+      - Writer
+      - Try
 
-Moreover includes some extension methods for combining/composing/currying functions.</Description>
+      Moreover includes some extension methods for combining/composing/currying functions.
+</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>2013-2020 tetrodoxin</Copyright>
     <RepositoryUrl>https://github.com/tetrodoxin/interlook-commons.git</RepositoryUrl>
@@ -47,5 +49,4 @@ Moreover includes some extension methods for combining/composing/currying functi
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-
 </Project>

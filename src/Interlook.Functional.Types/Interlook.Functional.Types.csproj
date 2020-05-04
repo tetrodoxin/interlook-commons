@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;netcoreapp2.1;netstandard2.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <LangVersion>Latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Company>Andreas H.</Company>
+    <Authors>Andreas H.</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Base types for functional programming in C#
+- strings
+- filesystem-paths</Description>
+    <PackageTags>general, csharp, library, extension, functional</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Interlook.Functional\Interlook.Functional.csproj" />
+    <ProjectReference Include="..\Interlook.Text\Interlook.Text.csproj" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp2.1'">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCORE21</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net451'">
+    <DefineConstants>$(DefineConstants);NET451</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net472'">
+    <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET472</DefineConstants>
+  </PropertyGroup>
+
+
+</Project>

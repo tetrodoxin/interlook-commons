@@ -22,8 +22,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#endregion 
+#endregion license
+
 using System;
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -72,6 +74,14 @@ namespace Interlook.Monads
     public static class Writer
     {
         /// <summary>
+        /// Returns a new, empty monadic writer without a value.
+        /// </summary>
+        /// <typeparam name="TCollection">The type of the elements to be written.</typeparam>
+        /// <returns>A new <see cref="Writer{TCollection, Unit}"/> instance, with an empty collection.</returns>
+        public static Writer<TCollection, Unit> ReturnEmptyWriter<TCollection>()
+            => () => new WriterEntry<TCollection, Unit>(Unit.Default, new TCollection[0]);
+
+        /// <summary>
         /// Returns a new, empty monadic writer with the specified value.
         /// </summary>
         /// <typeparam name="TCollection">The type of the elements to be written.</typeparam>
@@ -79,10 +89,7 @@ namespace Interlook.Monads
         /// <param name="value">The value.</param>
         /// <returns></returns>
         public static Writer<TCollection, TValue> ReturnWriter<TCollection, TValue>(TValue value)
-        {
-            return () => new WriterEntry<TCollection, TValue>(value, new TCollection[0]);
-        }
-
+            => () => new WriterEntry<TCollection, TValue>(value, new TCollection[0]);
 
         /// <summary>
         /// Writes an elements into a new writer with a specified value.
@@ -118,9 +125,8 @@ namespace Interlook.Monads
         /// <typeparam name="TCollection">The type of the elements to be written.</typeparam>
         /// <param name="elementToWrite">The element to write.</param>
         /// <returns></returns>
-        public static Writer<TCollection, Unit> Tell<TCollection>(TCollection elementToWrite) 
+        public static Writer<TCollection, Unit> Tell<TCollection>(TCollection elementToWrite)
             => () => new WriterEntry<TCollection, Unit>(Unit.Default, new TCollection[] { elementToWrite });
-
 
         /// <summary>
         /// Maps a writer to a new writer.
@@ -154,21 +160,21 @@ namespace Interlook.Monads
         /// <typeparam name="TCollection">The type of the elements to be written.</typeparam>
         /// <typeparam name="TValue">The type of the value.</typeparam>
         /// <typeparam name="TValueNew">The type of the new value.</typeparam>
-        /// <param name="obj">The object.</param>
+        /// <param name="writer">The object.</param>
         /// <param name="function">The function, that selects a type <typeparamref name="TValueNew" />
         /// from type <typeparamref name="TValue" /></param>
         /// <returns>
         /// A new <see cref="Writer{TArgument, TResultNew}" /> instance.
         /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="obj" /> or <paramref name="function" /> was <c>null</c>.</exception>
-        public static Writer<TCollection, TValueNew> Select<TCollection, TValue, TValueNew>(this Writer<TCollection, TValue> obj, Func<TValue, TValueNew> function)
+        /// <exception cref="ArgumentNullException">If <paramref name="writer" /> or <paramref name="function" /> was <c>null</c>.</exception>
+        public static Writer<TCollection, TValueNew> Select<TCollection, TValue, TValueNew>(this Writer<TCollection, TValue> writer, Func<TValue, TValueNew> function)
         {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
             return () =>
             {
-                var original = obj();
+                var original = writer();
                 var mapped = function(original.Value);
                 return new WriterEntry<TCollection, TValueNew>(mapped, original.Elements);
             };
@@ -180,21 +186,21 @@ namespace Interlook.Monads
         /// <typeparam name="TCollection">The type of the elements to be written.</typeparam>
         /// <typeparam name="TValue">The type of the value.</typeparam>
         /// <typeparam name="TValueNew">The type of the new value.</typeparam>
-        /// <param name="obj">The object.</param>
+        /// <param name="writer">The object.</param>
         /// <param name="function">The function, that selects a type <typeparamref name="TValueNew" />
         /// from type <typeparamref name="TValue" /></param>
         /// <returns>
         /// A new <see cref="Writer{TArgument, TResultNew}" /> instance.
         /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="obj" /> or <paramref name="function" /> was <c>null</c>.</exception>
-        public static Writer<TCollection, TValueNew> Bind<TCollection, TValue, TValueNew>(this Writer<TCollection, TValue> obj, Func<TValue, Writer<TCollection, TValueNew>> function)
+        /// <exception cref="ArgumentNullException">If <paramref name="writer" /> or <paramref name="function" /> was <c>null</c>.</exception>
+        public static Writer<TCollection, TValueNew> Bind<TCollection, TValue, TValueNew>(this Writer<TCollection, TValue> writer, Func<TValue, Writer<TCollection, TValueNew>> function)
         {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
             return () =>
             {
-                var original = obj();
+                var original = writer();
                 var mapped = function(original.Value)();
                 return new WriterEntry<TCollection, TValueNew>(mapped.Value, original.Elements.Concat(mapped.Elements));
             };

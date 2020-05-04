@@ -124,6 +124,78 @@ namespace Interlook.Monads
         }
 
         /// <summary>
+        /// <para>
+        /// Creates a <see cref="Try{T}"/>-instance, encapsulating a method invocation,
+        /// without return-value but maybe throwing an exception.
+        /// </para>
+        /// </summary>
+        /// <param name="action">The method call to execute.</param>
+        /// <returns>A <see cref="Try{T}"/>-instance.</returns>
+        public static Try<Unit> Invoke(Action action)
+        {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+
+            try
+            {
+                action();
+                return new Success<Unit>(Unit.Default);
+            }
+            catch (Exception ex)
+            {
+                return new Failure<Unit>(ex);
+            }
+        }
+
+        /// <summary>
+        /// <para>
+        /// Creates an <see cref="Either{Exception, TResult}"/>-instance, encapsulating a method invocation,
+        /// either as <see cref="Right{Exception, TResult}"/>, if the invocation suceeded or respectively
+        /// <see cref="Left{Exception, TResult}"/>, if an exception occured.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="TResult">Data type of the result value.</typeparam>
+        /// <param name="func">The method call to execute.</param>
+        /// <returns>A <see cref="Either{Exception, TResult}"/>-instance, according to success of incovation.</returns>
+        public static Either<Exception, TResult> InvokeToExceptionEither<TResult>(Func<TResult> func)
+        {
+            if (func == null) return new Left<Exception, TResult>(new ArgumentNullException($"{nameof(InvokeToExceptionEither)} was called without a function to invoke.", nameof(func)));
+
+            try
+            {
+                var value = func();
+                return Either.Right<Exception, TResult>(value);
+            }
+            catch (Exception ex)
+            {
+                return Either.Left<Exception, TResult>(ex);
+            }
+        }
+
+        /// <summary>
+        /// <para>
+        /// Creates an <see cref="Either{Exception, Unit}"/>-instance, encapsulating a method invocation,
+        /// either as <see cref="Right{Exception, Unit}"/>, if the invocation suceeded or respectively
+        /// <see cref="Left{Exception, Unit}"/>, if an exception occured.
+        /// </para>
+        /// </summary>
+        /// <param name="action">The method call to execute.</param>
+        /// <returns>A <see cref="Either{Exception, Unit}"/>-instance, according to success of incovation.</returns>
+        public static Either<Exception, Unit> InvokeToExceptionEither(Action action)
+        {
+            if (action == null) return new Right<Exception, Unit>(Unit.Default);
+
+            try
+            {
+                action();
+                return new Right<Exception, Unit>(Unit.Default);
+            }
+            catch (Exception ex)
+            {
+                return Either.Left<Exception, Unit>(ex);
+            }
+        }
+
+        /// <summary>
         /// Evaluates the try monad with one of two given mapping functions
         /// depending on the state of the try.
         /// </summary>

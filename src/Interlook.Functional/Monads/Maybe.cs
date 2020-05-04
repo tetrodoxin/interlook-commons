@@ -42,6 +42,14 @@ namespace Interlook.Monads
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="func">The function to bind.</param>
         protected internal abstract Maybe<TResult> BindInternal<TResult>(Func<T, Maybe<TResult>> func);
+
+        /// <summary>
+        /// Ensures the value to be of a certain subtype of <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="TSubtype">Datatype, being a subtype of <typeparamref name="T"/>, 
+        /// that the value of a <see cref="Just{T}"/> instance is excpected to be.</typeparam>
+        /// <returns></returns>
+        public abstract Maybe<TSubtype> WhereOfSubtype<TSubtype>();
     }
 
     /// <summary>
@@ -89,6 +97,15 @@ namespace Interlook.Monads
         /// <param name="func">The function to bind.</param>
         /// <returns></returns>
         protected internal override Maybe<TResult> BindInternal<TResult>(Func<T, Maybe<TResult>> func) => new Nothing<TResult>();
+
+        /// <summary>
+        /// Returns  <see cref="Nothing{TSubtype}"/>, since there is no
+        /// value to check for a specific type.
+        /// </summary>
+        /// <typeparam name="TSubtype"></typeparam>
+        /// <returns><see cref="Nothing{TSubtype}.Instance"/></returns>
+        public override Maybe<TSubtype> WhereOfSubtype<TSubtype>()
+            => Nothing<TSubtype>.Instance;
     }
 
     /// <summary>
@@ -192,6 +209,9 @@ namespace Interlook.Monads
         /// <param name="func">The function to bind.</param>
         /// <returns>The result of the <paramref name="func"/></returns>
         protected internal override Maybe<TResult> BindInternal<TResult>(Func<T, Maybe<TResult>> func) => func(Value);
+
+        public override Maybe<TSubtype> WhereOfSubtype<TSubtype>()
+            => Value is TSubtype sub ? (Maybe<TSubtype>)new Just<TSubtype>(sub) : Nothing<TSubtype>.Instance;
     }
 
     /// <summary>
