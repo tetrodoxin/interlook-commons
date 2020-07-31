@@ -12,8 +12,9 @@
 - strings
 - filesystem-paths</Description>
     <PackageTags>general, csharp, library, extension, functional</PackageTags>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.4</AssemblyVersion>
+    <Version>1.0.1.4</Version>
+    <PackageProjectUrl>https://github.com/tetrodoxin/interlook-commons</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
