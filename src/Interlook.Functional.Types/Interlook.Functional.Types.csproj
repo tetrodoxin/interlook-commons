@@ -32,6 +32,4 @@
     <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>
     <DefineConstants>$(DefineConstants);NET472</DefineConstants>
   </PropertyGroup>
-
-
 </Project>

@@ -587,7 +587,7 @@ namespace Interlook.Functional.Types
             .FailIf(p => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && pathEndsWithPeriodOrSpace(p.Path), p => new ArgumentException("In Windows paths must not end with '.'", nameof(path)))
             .Select(p => new NonEmptyPath(p.Path, p.IsDirectory));
 
-        internal static bool EndsInDirectorySeparator(SomeString path) => isDirectorySeparatorChar(path[-1]);
+        internal static bool EndsInDirectorySeparator(SomeString path) => isDirectorySeparatorChar(path[path.Length - 1]);
 
         internal static Either<Exception, SomeString> EnsureDirectoryPathString(SomeString path)
             => (EndsInDirectorySeparator(path) ? path : path.Concat(io.Path.DirectorySeparatorChar)).ToExceptionEither();
