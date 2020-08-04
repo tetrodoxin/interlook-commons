@@ -26,10 +26,6 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
     <DefineConstants>$(DefineConstants);NETCORE21</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='net451'">
-    <DefineConstants>$(DefineConstants);NET451</DefineConstants>
-    <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>
-  </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net472'">
     <DefineConstants>$(DefineConstants);NET451PLUS</DefineConstants>

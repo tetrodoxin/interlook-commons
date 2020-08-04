@@ -100,7 +100,7 @@ namespace Interlook.Functional.Types
         }
 
         private static ProcessStartInfo createCmdWrapperStartInfo(string processExecutablePath, string commandParametersString)
-                                    => createCmdWrapperStartInfo(processExecutablePath, Path.GetDirectoryName(processExecutablePath) ?? string.Empty, commandParametersString);
+                                    => createCmdWrapperStartInfo(processExecutablePath, System.IO.Path.GetDirectoryName(processExecutablePath) ?? string.Empty, commandParametersString);
 
         private static ProcessStartInfo createCmdWrapperStartInfo(string processExecutablePath, string workingDir, string commandParametersString)
         {
