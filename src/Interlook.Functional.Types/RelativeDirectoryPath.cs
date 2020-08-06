@@ -1,6 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Interlook.Monads;
+using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Interlook.Functional.Types.UnitTests")]
+
 namespace Interlook.Functional.Types
 {
     /// <summary>
@@ -10,8 +12,16 @@ namespace Interlook.Functional.Types
     /// <seealso cref="NonEmptyPath" />
     public sealed class RelativeDirectoryPath : RelativePath
     {
+        /// <summary>
+        /// The name of the directory (leaf of the path, without any separator)
+        /// </summary>
+        public SomeString Name { get; }
+
         internal RelativeDirectoryPath(SomeString trimmedPath) : base(trimmedPath, true)
         {
+            Name = Try.InvokeToExceptionEither(() => System.IO.Path.GetFileName(trimmedPath))
+                .Bind(dirname => StringBase.CreateSome(dirname))
+                .MapEither(_ => trimmedPath, dirname => dirname);
         }
     }
 }

@@ -21,9 +21,18 @@ namespace Interlook.Functional.Types
         /// </summary>
         public AbsoluteDirectoryPath Directory { get; protected set; }
 
+        /// <summary>
+        /// The name of the file itself (leaf of the path, without any separator, but with extension)
+        /// </summary>
+        public SomeString Name { get; }
+
+
         internal AbsoluteFilePath(SomeString trimmedPath, AbsoluteDirectoryPath directory) : base(trimmedPath, false)
         {
             Directory = directory;
+            Name = Try.InvokeToExceptionEither(() => io.Path.GetFileName(trimmedPath))
+                .Bind(dirname => StringBase.CreateSome(dirname))
+                .MapEither(_ => trimmedPath, dirname => dirname);
         }
 
 

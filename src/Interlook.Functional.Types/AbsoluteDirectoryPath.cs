@@ -16,8 +16,17 @@ namespace Interlook.Functional.Types
     /// <seealso cref="NonSneakyPath" />
     public class AbsoluteDirectoryPath : AbsolutePath
     {
+
+        /// <summary>
+        /// The name of the directory (leaf of the path, without any separator)
+        /// </summary>
+        public SomeString Name { get; }
+
         internal AbsoluteDirectoryPath(SomeString trimmedPath) : base(trimmedPath, true)
         {
+            Name = Try.InvokeToExceptionEither(() => io.Path.GetFileName(trimmedPath))
+                .Bind(dirname => StringBase.CreateSome(dirname))
+                .MapEither(_ => trimmedPath, dirname => dirname);
         }
 
         /// <summary>

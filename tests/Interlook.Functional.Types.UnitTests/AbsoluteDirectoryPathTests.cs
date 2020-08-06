@@ -157,6 +157,19 @@ namespace Interlook.Functional.Types.UnitTests
             testReturnDirectoryPath_StringInstance_WithSeparator(Path.AltDirectorySeparatorChar);
         }
 
+        [Fact]
+        public void Name_Property()
+        {
+            string dirName = "LeafDir";
+            SomeString baseDirSomeString = DirNameSomeString.Concat(Path.DirectorySeparatorChar).Concat(dirName);
+            var path = AbsolutePath.ReturnDirectoryPath(baseDirSomeString).GetRight();
+
+            var actual = path.Name;
+
+            actual.Value.Should().Be(dirName);
+
+        }
+
         private static void testReturnDirectoryPath_InvalidChar_FromSomeString(char testChar)
         {
             var fullPathSomeString = DirNameSomeString.Concat(Path.DirectorySeparatorChar).Concat($"prefix{testChar}suffix{Path.DirectorySeparatorChar}");

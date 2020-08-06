@@ -46,6 +46,20 @@ namespace Interlook.Functional.Types.UnitTests
             }
         }
 
+
+        [Fact]
+        public void Name_Property()
+        {
+            SomeString pathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat(FileSomeString);
+            var path = AbsolutePath.ReturnDirectoryPath(pathSomeString).GetRight();
+
+            var actual = path.Name;
+
+            actual.Should().Be(FileSomeString);
+
+        }
+
+
         [Fact]
         public void ReturnFilePath_FromSomeStringWithDirSeparatorTail_Negative()
         {
