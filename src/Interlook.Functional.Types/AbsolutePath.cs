@@ -71,7 +71,7 @@ namespace Interlook.Functional.Types
                 .FailIf(_ => directoryPath == null, new ArgumentNullException(nameof(directoryPath)))
                 .Bind(_ => EnsureDirectoryPathString(directoryPath))
                 .Bind(EnsureRootedNonSneakyPath)
-                .Select(path => new AbsoluteDirectoryPath(path.Path));
+                .Select(path => new AbsoluteDirectoryPath(path.TrimmedPathInternal));
 
         /// <summary>
         /// Tries to create a <see cref="AbsoluteFilePath"/> object.
@@ -96,7 +96,7 @@ namespace Interlook.Functional.Types
         public static Either<Exception, AbsoluteFilePath> ReturnFilePath(SomeString filePath)
             => filePath.ToExceptionEither()
                 .FailIf(_ => filePath == null, new ArgumentNullException(nameof(filePath)))
-                .Bind(_ => GetTrimmedPathString(filePath))
+                .FailIf(_ => IsDirectoryPath(filePath), new FormatException("Provided path seems to specify a directory rather than a file"))
                 .Bind(EnsureRootedNonSneakyPath)
                 .Bind(validPath => Try.InvokeToExceptionEither(() => io.Path.GetDirectoryName(validPath.Path) ?? string.Empty)
                     .FailIf(parentDirString => parentDirString.IsNullOrEmpty(), new FileNotFoundException($"Path `{validPath.Path}` references no file with a parent directory."))

@@ -143,6 +143,7 @@ namespace Interlook.Functional.Types
         private Either<Exception, Process> checkCanStart()
                                     => _process.ToExceptionEither()
                 .FailIf(_ => !atomicToggleRunState(), new InvalidOperationException("Process has already run, cannot start again."));
+
         private string getErrorsAsSingleString()
         {
             try

@@ -77,7 +77,7 @@ namespace Interlook.Functional.Types
         /// <returns>A new instance of <see cref="AbsoluteDirectoryPath"/> or this instance, 
         /// if <paramref name="nonSneakyRelativePath"/> was <c>null</c>.</returns>
         public AbsoluteDirectoryPath Combine(NonSneakyRelativeDirectoryPath nonSneakyRelativePath)
-            => nonSneakyRelativePath == null ? this : new AbsoluteDirectoryPath(CombinePathName(nonSneakyRelativePath.Path));
+            => nonSneakyRelativePath == null ? this : new AbsoluteDirectoryPath(CombinePathName(nonSneakyRelativePath.TrimmedPathInternal));
 
         /// <summary>
         /// Combines the direcotry path with a <see cref="NonSneakyRelativeFilePath"/>

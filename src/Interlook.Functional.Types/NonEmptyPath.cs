@@ -15,7 +15,7 @@ namespace Interlook.Functional.Types
     /// <seealso cref="IPath" />
     public class NonEmptyPath : IPath
     {
-        private static readonly char[] _invalidPathChars =
+        internal static readonly char[] InvalidPathChars =
             io.Path.GetInvalidPathChars()   // system defined invalid path chars
             .Concat("*?".ToCharArray())     // also append wildcard chars
             .ToArray();
@@ -87,7 +87,7 @@ namespace Interlook.Functional.Types
 
         internal static Either<Exception, NonEmptyPath> CreateNonEmpty(SomeString path)
             => path.ToExceptionEither()
-            .Bind(origPath => origPath.Value.IndexOfAny(_invalidPathChars).ToExceptionEither()
+            .Bind(origPath => origPath.Value.IndexOfAny(InvalidPathChars).ToExceptionEither()
                 .FailIf(pos => pos >= 0, pos => new ArgumentException($"Path contains invalid character '{origPath.Value[pos]}' at position {pos}.", nameof(path)))
                 .Select(pos => origPath))
             .Bind(origPath => GetTrimmedPathString(origPath).Select(trimmedPath => (Path: trimmedPath, IsDirectory: EndsInDirectorySeparator(origPath))))

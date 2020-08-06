@@ -11,7 +11,7 @@ namespace Interlook.Functional.Types
     /// A non-empty reference of a relative path, thus having no rooted directory.
     /// </summary>
     /// <seealso cref="NonEmptyPath" />
-    public class RelativePath : NonEmptyPath
+    public abstract class RelativePath : NonEmptyPath
     {
         internal RelativePath(SomeString trimmedPath, bool isDirectory) : base(trimmedPath, isDirectory)
         { }
