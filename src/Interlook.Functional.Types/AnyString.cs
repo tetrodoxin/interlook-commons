@@ -1,4 +1,29 @@
-﻿using Interlook.Monads;
+﻿#region license
+
+//MIT License
+
+//Copyright(c) 2013-2020 Andreas Hübner
+
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
+#endregion 
+using Interlook.Monads;
 using Interlook.Text;
 using System;
 
@@ -8,60 +33,37 @@ namespace Interlook.Functional.Types
     /// <summary>
     /// A base class for string objects in functional world.
     /// </summary>
-    public abstract class StringBase : ObjectBase<string>
+    public abstract class AnyString
     {
         /// <summary>
         /// The length of the string.
         /// </summary>
         public int Length { get; }
 
-        internal StringBase(string value) : base(value)
+        /// <summary>
+        /// The actual string value
+        /// </summary>
+        public string Value { get; }
+
+        internal AnyString(string value)
         {
             Length = value.Length;
+            Value = value;
         }
 
         /// <summary>
         /// Creates a functional string object from an instance of <see cref="string"/>.
         /// </summary>
         /// <param name="s">The string instance.</param>
-        /// <returns>An instance of <see cref="EmptyString"/>, <see cref="NonEmptyString"/> or
+        /// <returns>An instance of <see cref="EmptyString"/>, <see cref="WhitespaceString"/> or
         /// <see cref="SomeString"/> according to the content of <paramref name="s"/></returns>
-        public static StringBase Create(string s)
-            => CreateNonEmpty(s)
-                .MapEither(
-                    _ => EmptyString.Default,
-                    nonEmpty => CreateSome(nonEmpty)
-                        .MapEither(_ => (StringBase)nonEmpty, some => some));
+        public static AnyString Create(string s)
+            => s.IsNullOrEmpty()
+                ? EmptyString.Default
+                : CanCreateWhiteSpaceStringFrom(s)
+                    .Select(_ => (AnyString)new SomeString(s))
+                    .GetValue(new WhitespaceString(s));
 
-        /// <summary>
-        /// Creates an instance of a non-empty string object.
-        /// </summary>
-        /// <param name="value">The non-empty content the string object.</param>
-        /// <returns></returns>
-        public static Either<Exception, NonEmptyString> CreateNonEmpty(string value)
-            => value.ToExceptionEither()
-                .FailIf(s => s.IsNullOrEmpty(), new ArgumentException("Provided string must not be empty", nameof(value)))
-                .Select(s => new NonEmptyString(s));
-
-        /// <summary>
-        /// Creates an instance of a non-empty string object, that contains
-        /// actual characters, rather than whitespace-characters only.
-        /// </summary>
-        /// <param name="value">The actual content the string object.</param>
-        /// <returns></returns>
-        public static Either<Exception, SomeString> CreateSome(NonEmptyString value)
-            => value.ToExceptionEither()
-                .FailIf(s => s.Value.IsNothing(), new ArgumentException("Provided string must contain actual characters not only whitespaces/tabs", nameof(value)))
-                .Select(s => new SomeString(s));
-
-        /// <summary>
-        /// Creates an instance of a non-empty string object, that contains
-        /// actual characters, rather than whitespace-characters only.
-        /// </summary>
-        /// <param name="value">The actual content the string object.</param>
-        /// <returns></returns>
-        public static Either<Exception, SomeString> CreateSome(string value)
-            => CreateNonEmpty(value).Bind(CreateSome);
 
         /// <summary>
         /// Determines if two string objects have the same value.
@@ -71,7 +73,7 @@ namespace Interlook.Functional.Types
         /// <param name="y">The second string object</param>
         /// <param name="comparisonType">One of the enumeration values that specifies the rules for the comparison.</param>
         /// <returns></returns>
-        public static bool Equals(StringBase x, StringBase y, StringComparison comparisonType)
+        public static bool Equals(AnyString x, AnyString y, StringComparison comparisonType)
             => string.Equals(x.Value, y.Value, comparisonType);
 
         /// <summary>
@@ -79,7 +81,7 @@ namespace Interlook.Functional.Types
         /// using <see cref="Create(string)"/>
         /// </summary>
         /// <param name="s">The <see cref="string"/> to convert implicitly</param>
-        public static implicit operator StringBase(string s) => Create(s);
+        public static implicit operator AnyString(string s) => Create(s);
 
         /// <summary>
         /// Determines whether this string object contains a specified string.
@@ -90,7 +92,7 @@ namespace Interlook.Functional.Types
         ///   otherwise, <c>false</c>.
         /// </returns>
         public virtual bool Contains(string value)
-            => Value.Contains(value);
+            => value != null && Value.Contains(value);
 
         /// <summary>
         /// Determines whether this string object contains a specified string.
@@ -102,12 +104,32 @@ namespace Interlook.Functional.Types
         ///   otherwise, <c>false</c>.
         /// </returns>
         public virtual bool Contains(string value, StringComparison comparisonType)
-#if NETCORE
-            => Value.Contains(value, comparisonType);
-#else
-            => Value.IndexOf(value, comparisonType) >= 0;
+            => value != null && Value.Contains(value, comparisonType);
 
-#endif
+
+        /// <summary>
+        /// Determines whether this string object contains a specified character.
+        /// </summary>
+        /// <param name="value">The character to seek.</param>
+        /// <returns>
+        ///   <c>true</c> if the value in <paramref name="value"/> occurs in this string object;
+        ///   otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool Contains(char value)
+            => Value.Contains(value);
+
+        /// <summary>
+        /// Determines whether this string object contains a specified character.
+        /// </summary>
+        /// <param name="value">The character to seek.</param>
+        /// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
+        /// <returns>
+        ///   <c>true</c> if the value in <paramref name="value"/> occurs in this string object;
+        ///   otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool Contains(char value, StringComparison comparisonType)
+            => Value.Contains(value, comparisonType);
+
 
         /// <summary>
         /// Determines whether the end of this string object matches a specified string.
@@ -118,7 +140,7 @@ namespace Interlook.Functional.Types
         ///   the end of this string object; otherwise, <c>false</c>.
         /// </returns>
         public virtual bool EndsWith(string value)
-            => Value.EndsWith(value);
+            => value != null && Value.EndsWith(value);
 
         /// <summary>
         /// Determines whether the end of this string object matches a specified string.
@@ -130,7 +152,7 @@ namespace Interlook.Functional.Types
         ///   the end of this string object; otherwise, <c>false</c>.
         /// </returns>
         public virtual bool EndsWith(string value, StringComparison comparisonType)
-            => Value.EndsWith(value, comparisonType);
+            => value != null && Value.EndsWith(value, comparisonType);
 
         /// <summary>
         /// Determines whether the last character of this string object mathes a specified one.
@@ -141,24 +163,68 @@ namespace Interlook.Functional.Types
         ///   the end of this string object; otherwise, <c>false</c>.
         /// </returns>
         public virtual bool EndsWith(char value)
-#if NETCORE
             => Value.EndsWith(value);
-#else
-            => Value.EndsWith(value.ToString());
-
-#endif
 
         /// <summary>
         /// Determines whether this string object has the same content as a specified one.
         /// </summary>
-        /// <param name="other">The a string object to compare this instance to.</param>
+        /// <param name="other">The string object to compare this instance to.</param>
         /// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
         /// <returns>
         ///   <c>true</c> if the value in <paramref name="other"/> matches with
         ///   the content of this string object; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool Equals(StringBase other, StringComparison comparisonType)
-            => string.Equals(Value, other.Value, comparisonType);
+        public virtual bool Equals(AnyString other, StringComparison comparisonType)
+            => other != null && string.Equals(Value, other.Value, comparisonType);
+
+        /// <summary>
+        /// Determines whether this string object has the same content as a specified one.
+        /// </summary>
+        /// <param name="other">The string object to compare this instance to.</param>
+        /// <returns>
+        ///   <c>true</c> if the value in <paramref name="other"/> matches with
+        ///   the content of this string object; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool Equals(AnyString other)
+            => other != null && string.Equals(Value, other.Value);
+
+        /// <summary>
+        /// Determines whether this string object has the same content as a specified string.
+        /// </summary>
+        /// <param name="other">The string to compare this instance to.</param>
+        /// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
+        /// <returns>
+        ///   <c>true</c> if the value in <paramref name="other"/> matches with
+        ///   the content of this string object; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool Equals(string other, StringComparison comparisonType)
+            => other != null && string.Equals(Value, other, comparisonType);
+
+        /// <summary>
+        /// Determines whether this string object has the same content as a specified string.
+        /// </summary>
+        /// <param name="other">The string to compare this instance to.</param>
+        /// <returns>
+        ///   <c>true</c> if the value in <paramref name="other"/> matches with
+        ///   the content of this string object; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool Equals(string other)
+            => other != null && string.Equals(Value, other);
+
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        public override string ToString() => Value;
+
+        public override int GetHashCode() => Value.GetHashCode();
+
+        public override bool Equals(object? obj) 
+            => obj switch
+                {
+                    AnyString f => Equals(f),
+                    string s => Equals(s),
+                    _ => false
+                };
+#pragma warning restore CS1591 
 
         /// <summary>
         /// Determines whether the beginning of this string object matches a specified string.
@@ -169,7 +235,7 @@ namespace Interlook.Functional.Types
         ///   the beginning of this string object; otherwise, <c>false</c>.
         /// </returns>
         public virtual bool StartsWith(string value)
-            => Value.StartsWith(value);
+            => value != null && Value.StartsWith(value);
 
         /// <summary>
         /// Determines whether the beginning of this string object matches a specified string.
@@ -181,7 +247,7 @@ namespace Interlook.Functional.Types
         ///   the beginning of this string object; otherwise, <c>false</c>.
         /// </returns>
         public virtual bool StartsWith(string value, StringComparison comparisonType)
-            => Value.StartsWith(value, comparisonType);
+            => value != null && Value.StartsWith(value, comparisonType);
 
         /// <summary>
         /// Determines whether the first character of this string object mathes a specified one.
@@ -192,12 +258,7 @@ namespace Interlook.Functional.Types
         ///   the first character of this string object; otherwise, <c>false</c>.
         /// </returns>
         public virtual bool StartsWith(char value)
-#if NETCORE
             => Value.StartsWith(value);
-#else
-            => Value.StartsWith(value.ToString());
-
-#endif
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified string
@@ -212,7 +273,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int IndexOf(string value, int startIndex, int count, StringComparison comparisonType)
-            => Value.IndexOf(value, startIndex, count, comparisonType);
+            => value != null
+            ? Value.IndexOf(value, startIndex, count, comparisonType)
+            : -1;
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified string
@@ -225,7 +288,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int IndexOf(string value, int startIndex, StringComparison comparisonType)
-            => Value.IndexOf(value, startIndex, comparisonType);
+            => value != null
+                ? Value.IndexOf(value, startIndex, comparisonType)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified string
@@ -236,7 +301,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <c>0</c>.</returns>
         public virtual int IndexOf(string value, StringComparison comparisonType)
-            => Value.IndexOf(value, comparisonType);
+            => value != null
+                ? Value.IndexOf(value, comparisonType)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified string
@@ -249,7 +316,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int IndexOf(string value, int startIndex, int count)
-            => Value.IndexOf(value, startIndex, count);
+            => value != null
+                ? Value.IndexOf(value, startIndex, count)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified string
@@ -261,7 +330,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int IndexOf(string value, int startIndex)
-            => Value.IndexOf(value, startIndex);
+            => value != null
+                ? Value.IndexOf(value, startIndex)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified string
@@ -271,7 +342,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <c>0</c>.</returns>
         public virtual int IndexOf(string value)
-            => Value.IndexOf(value);
+            => value != null
+                ? Value.IndexOf(value)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified character
@@ -356,7 +429,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int LastIndexOf(string value, int startIndex, int count, StringComparison comparisonType)
-            => Value.LastIndexOf(value, startIndex, count, comparisonType);
+            => value != null
+                ? Value.LastIndexOf(value, startIndex, count, comparisonType)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the last occurrence of the specified string
@@ -370,7 +445,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int LastIndexOf(string value, int startIndex, StringComparison comparisonType)
-            => Value.LastIndexOf(value, startIndex, comparisonType);
+            => value != null
+                ? Value.LastIndexOf(value, startIndex, comparisonType)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the last occurrence of the specified string
@@ -382,7 +459,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <c>0</c>.</returns>
         public virtual int LastIndexOf(string value, StringComparison comparisonType)
-            => Value.LastIndexOf(value, comparisonType);
+            => value != null
+                ? Value.LastIndexOf(value, comparisonType)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the last occurrence of the specified string
@@ -396,7 +475,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <paramref name="startIndex"/>.</returns>
         public virtual int LastIndexOf(string value, int startIndex, int count)
-            => Value.LastIndexOf(value, startIndex, count);
+            => value != null
+                ? Value.LastIndexOf(value, startIndex, count)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index of the last occurrence of the specified string
@@ -418,7 +499,9 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the value parameter if that string is found,
         /// or <c>-1</c> if it is not. If <paramref name="value"/> is an empty string, the return value is <c>0</c>.</returns>
         public virtual int LastIndexOf(string value)
-            => Value.LastIndexOf(value);
+            => value != null
+                ? Value.LastIndexOf(value)
+                : -1;
 
         /// <summary>
         /// Reports the zero-based index position of the last occurrence of the specified
@@ -491,6 +574,58 @@ namespace Interlook.Functional.Types
         /// <returns>The zero-based index position of the last occurrence in this instance where
         /// any character in <paramref name="anyOf"/> was found; <c>-1</c> if no character in <paramref name="anyOf"/> was found.</returns>
         public virtual int LastIndexOfAny(char[] anyOf)
-            => Value.LastIndexOfAny(anyOf);
+            => anyOf != null
+                ? Value.LastIndexOfAny(anyOf)
+                : -1;
+
+        /// <summary>
+        /// Returns the char at a specified position,
+        /// if that position is valid.
+        /// </summary>
+        /// <param name="charPosition">The position in the string.
+        /// A negative value is subtracted from the strings length, thus indexing backwards, 
+        /// whereas -1 references the final character.</param>
+        /// <returns>A <see cref="Just{Char}"/> instance containing the character at the requested position,
+        /// if such is present; otherwise <see cref="Nothing{Char}"/></returns>
+        protected Maybe<char> GetCharAtPosition(int charPosition) 
+            => Math.Abs(charPosition) >= Length
+                ? Nothing<char>.Instance
+                : (charPosition >= 0 ? Value[charPosition] : Value[Value.Length - charPosition]).ToMaybe();
+
+        /// <summary>
+        /// Checks, if a string meets the requirements of <see cref="WhitespaceString"/>
+        /// </summary>
+        /// <param name="s">The string to create a <see cref="WhitespaceString"/> from.</param>
+        /// <returns>An instance of <see cref="Just{ArgumentException}"/> containing the violated requirement;
+        /// otherwise <see cref="Nothing{ArgumentException}"/>, if a <see cref="WhitespaceString"/> instance
+        /// can be created from <paramref name="s"/></returns>
+        internal static Maybe<ArgumentException> CanCreateWhiteSpaceStringFrom(string s)
+        {
+            if (s.IsNullOrEmpty()) return new ArgumentException("Provided string must neither be <null> nor empty.").ToMaybe();
+            else if (!string.IsNullOrWhiteSpace(s)) new ArgumentException("Provided string must only contain whitespace characters, meaning any Unicode separators.");
+            return Nothing<ArgumentException>.Instance;
+        }
+
+
+        /// <summary>
+        /// Checks, if a string meets the requirements of <see cref="SomeString"/>
+        /// </summary>
+        /// <param name="s">The string to create a <see cref="SomeString"/> from.</param>
+        /// <returns>An instance of <see cref="Just{ArgumentException}"/> containing the violated requirement;
+        /// otherwise <see cref="Nothing{ArgumentException}"/>, if a <see cref="SomeString"/> instance
+        /// can be created from <paramref name="s"/></returns>
+        internal static Maybe<ArgumentException> CanCreateSomeStringFrom(string s) 
+            => s.IsNothing()
+                ? new ArgumentException("Provided string must neither be <null> nor consist only of whitespace characters.").ToMaybe()
+                : Nothing<ArgumentException>.Instance;
+
+        /// <summary>
+        /// Implicitely converts an <see cref="AnyString"/> into a <see cref="string"/>
+        /// </summary>
+        /// <param name="s">The string object to convert</param>
+#pragma warning disable CS8603 // Possible null reference return.
+        public static implicit operator string(AnyString s) => s != null ? s.Value ?? string.Empty : string.Empty;
+#pragma warning restore CS8603 // Possible null reference return.
+
     }
 }

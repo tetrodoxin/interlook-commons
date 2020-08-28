@@ -2,7 +2,7 @@
 using System;
 using Xunit;
 
-namespace Interlook.Functional.Types.Tests
+namespace Interlook.Functional.Types.UnitTests
 {
     public class EmptyStringTests
     {
@@ -14,6 +14,28 @@ namespace Interlook.Functional.Types.Tests
 
             result = EmptyString.Default.Contains("Alphanumeric8");
             result.Should().BeFalse("an EmptyString does not contain characters.");
+
+            result = EmptyString.Default.Contains("a", StringComparison.InvariantCulture);
+            result.Should().BeFalse("an EmptyString does not contain a character, regardless of the string comparison.");
+
+            result = EmptyString.Default.Contains("Alphanumeric8", StringComparison.CurrentCulture);
+            result.Should().BeFalse("an EmptyString does not contain characters, regardless of the string comparison.");
+        }
+
+        [Fact()]
+        public void Contains_SomeCharacter_Negative()
+        {
+            var result = EmptyString.Default.Contains('a');
+            result.Should().BeFalse("an EmptyString does not contain a character.");
+
+            result = EmptyString.Default.Contains(' ');
+            result.Should().BeFalse("an EmptyString does not contain characters, not even a whitespace.");
+
+            result = EmptyString.Default.Contains('a', StringComparison.InvariantCulture);
+            result.Should().BeFalse("an EmptyString does not contain a character, regardless of the string comparison.");
+
+            result = EmptyString.Default.Contains(' ', StringComparison.CurrentCulture);
+            result.Should().BeFalse("an EmptyString does not contain characters, not even a whitespace, regardless of the string comparison.");
         }
 
         [Fact()]
@@ -48,17 +70,31 @@ namespace Interlook.Functional.Types.Tests
         }
 
         [Fact()]
-        public void Create_FromEmptyString()
+        public void Create_FromStringEmpty()
         {
-            var obj = StringBase.Create(string.Empty);
-            obj.Should().BeOfType<EmptyString>("Calling StringBase.Create() with an empty string must return an EmptyString instance.");
+            var obj = AnyString.Create(string.Empty);
+            obj.Should().BeOfType<EmptyString>("calling StringBase.Create() with an empty string must return an EmptyString instance.");
         }
 
         [Fact()]
-        public void Create_FromNullString()
+        public void Create_FromStringEmpty_SameAsDefault()
         {
-            var obj = StringBase.Create(null);
-            obj.Should().BeOfType<EmptyString>("Calling StringBase.Create() with <null> must return an EmptyString instance.");
+            var obj = AnyString.Create(string.Empty);
+            obj.Should().BeSameAs(EmptyString.Default, "calling StringBase.Create() with an empty string must return the exact default instance.");
+        }
+
+        [Fact()]
+        public void Create_FromStringNull()
+        {
+            var obj = AnyString.Create(null);
+            obj.Should().BeOfType<EmptyString>("calling StringBase.Create() with <null> must return an EmptyString instance.");
+        }
+
+        [Fact()]
+        public void Create_FromStringNull_SameAsDefault()
+        {
+            var obj = AnyString.Create(null);
+            obj.Should().BeSameAs(EmptyString.Default, "calling StringBase.Create() with <null> must return the exact default instance.");
         }
 
         [Theory]
@@ -89,22 +125,65 @@ namespace Interlook.Functional.Types.Tests
         public void EndsWith_Null()
         {
             var result = EmptyString.Default.StartsWith(null);
-            result.Should().BeTrue("An EmptyString should handle <null> as a valid ending.");
+            result.Should().BeTrue("an EmptyString should handle <null> as a valid ending.");
         }
 
         [Fact()]
-        public void Equals_DefaultAndEmptyCreated()
+        public void Equals_Object_EmptyString()
         {
             var empty = EmptyString.Default;
-            var other = StringBase.Create(string.Empty);
+            object other = AnyString.Create(string.Empty);
 
             var result = empty.Equals(other);
 
-            result.Should().BeTrue("Two instances of EmptyString must be equal.");
+            result.Should().BeTrue("an EmptyString instance must always match EmptyString.");
         }
 
         [Fact()]
-        public void Equals_StringEmpty()
+        public void Equals_Object_StringEmpty()
+        {
+            var empty = EmptyString.Default;
+            object other = string.Empty;
+
+            var result = empty.Equals(other);
+
+            result.Should().BeTrue("two instances of EmptyString must be equal.");
+        }
+
+        [Fact()]
+        public void Equals_Object_Null_Negative()
+        {
+            var empty = EmptyString.Default;
+
+            var result = empty.Equals((object)null);
+
+            result.Should().BeFalse("an EmptyString instance never equals <null>.");
+        }
+
+        [Fact()]
+        public void Equals_Object_StringNonEmpty_Negative()
+        {
+            var empty = EmptyString.Default;
+            object other = "Alphanumeric";
+
+            var result = empty.Equals(other);
+
+            result.Should().BeFalse("an EmptyString instance never equals a non empty string.");
+        }
+
+        [Fact()]
+        public void Equals_String_StringNonEmpty_Negative()
+        {
+            var empty = EmptyString.Default;
+            string other = "Alphanumeric";
+
+            var result = empty.Equals(other);
+
+            result.Should().BeFalse("an EmptyString instance never equals a non empty string.");
+        }
+
+        [Fact()]
+        public void Equals_String_Empty()
         {
             var empty = EmptyString.Default;
             var other = string.Empty;
@@ -112,6 +191,15 @@ namespace Interlook.Functional.Types.Tests
             var result = empty.Equals(other);
 
             result.Should().BeTrue("An EmptyString instance must be equal to an empty string.");
+        }
+
+        [Fact()]
+        public void Equals_String_Null_Negative()
+        {
+            var empty = EmptyString.Default;
+            var result = empty.Equals((string)null);
+
+            result.Should().BeFalse("an EmptyString instance never equals <null>.");
         }
 
         [Theory]

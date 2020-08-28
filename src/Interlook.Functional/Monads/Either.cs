@@ -25,7 +25,6 @@
 #endregion license
 
 using System;
-
 using System.Collections.Generic;
 using System.Linq;
 
@@ -95,6 +94,29 @@ namespace Interlook.Monads
 
             return either.BindInternal(functionToBind);
         }
+
+        /// <summary>
+        /// Creates an "exception Either" object
+        /// containing a new <see cref="Exception"/> with a specified text and an inner exception.
+        /// </summary>
+        /// <typeparam name="TRight">The type of the right.</typeparam>
+        /// <param name="exceptionMessage">The exception message.</param>
+        /// <param name="innerException">The inner exception.</param>
+        /// <returns>A new instance of <see cref="Left{Exception, TRight}"/> containing
+        /// the newly created exception.</returns>
+        public static Either<Exception, TRight> CreateFailed<TRight>(string exceptionMessage, Exception innerException)
+            => Left<Exception, TRight>(new Exception(exceptionMessage, innerException));
+
+        /// <summary>
+        /// Creates an "exception Either" object
+        /// containing a new <see cref="Exception"/> with a specified text.
+        /// </summary>
+        /// <typeparam name="TRight">The type of the right.</typeparam>
+        /// <param name="exceptionMessage">The exception message.</param>
+        /// <returns>A new instance of <see cref="Left{Exception, TRight}"/> containing
+        /// the newly created exception.</returns>
+        public static Either<Exception, TRight> CreateFailed<TRight>(string exceptionMessage)
+            => Left<Exception, TRight>(new Exception(exceptionMessage));
 
         /// <summary>
         /// Switches to the left (failed) state under conditions, defined by a function.
@@ -239,6 +261,51 @@ namespace Interlook.Monads
                 source.Where(p => p.IsRight).Select(p => p.GetRight()));
         }
 
+
+#pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
+#pragma warning disable CS1658 // Warning is overriding an error
+        /// <summary>
+        /// Maps a sequence of <see cref="Either{Exception, TRight}"/> to an instance of
+        /// <see cref="Right{Exception, IEnumerable{TRight}}"/>, if and only if ALL
+        /// elements of that sequence are <see cref="Right{Exception, TRight}"/> instances;
+        /// otherwise an aggregate <see cref="Left{Exception, IEnumerable{TRight}}"/> is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="eithers">The sequence of either objects.</param>
+        /// <param name="errorFunc">A function to aggregate all errors of left-state either objects in <paramref name="eithers"/>.</param>
+        /// <returns>A <see cref="Right{Exception, IEnumerable{TRight}}"/> instance containing a sequence of <typeparamref name="T"/>-objects,
+        /// if all objects in <paramref name="eithers"/> were in right state; otherwise a <see cref="Left{Exception, IEnumerable{TRight}}"/>
+        /// isntance wrapping an aggregated exception.</returns>
+#if !NETCORE
+#pragma warning restore CS1658 // Warning is overriding an error
+#pragma warning restore CS1584 // XML comment has syntactically incorrect cref attribute
+#endif
+        public static Either<Exception, IEnumerable<T>> MapAllRightEithers<T>(this IEnumerable<Either<Exception, T>> eithers, Func<IEnumerable<Exception>, Exception> errorFunc)
+        {
+            var lefts = eithers.Lefts().ToList();
+            return lefts.Count > 0
+                ? Left<Exception, IEnumerable<T>>(errorFunc(lefts))
+                : eithers.Rights().ToExceptionEither();
+        }
+
+#pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
+#pragma warning disable CS1658 // Warning is overriding an error
+        /// <summary>
+        /// Maps a sequence of <see cref="Either{Exception, TRight}"/> to an instance of
+        /// <see cref="Right{Exception, IEnumerable{TRight}}"/>, if and only if ALL
+        /// elements of that sequence are <see cref="Right{Exception, TRight}"/> instances;
+        /// otherwise an aggregate <see cref="Left{Exception, IEnumerable{TRight}}"/> is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="eithers">The sequence of either objects.</param>
+        /// <returns>A <see cref="Right{Exception, IEnumerable{TRight}}"/> instance containing a sequence of <typeparamref name="T"/>-objects,
+        /// if all objects in <paramref name="eithers"/> were in right state; otherwise a <see cref="Left{Exception, IEnumerable{TRight}}"/>
+        /// isntance wrapping an aggregated exception.</returns>
+#pragma warning restore CS1658 // Warning is overriding an error
+#pragma warning restore CS1584 // XML comment has syntactically incorrect cref attribute
+        public static Either<Exception, IEnumerable<T>> MapAllRightEithers<T>(this IEnumerable<Either<Exception, T>> eithers)
+            => MapAllRightEithers(eithers, ex => new AggregateException(ex.ToArray()));
+
         /// <summary>
         /// Creates a new <see cref="Right{TLeft, TRight}"/> instance
         /// </summary>
@@ -246,6 +313,7 @@ namespace Interlook.Monads
         /// <typeparam name="TRight">The right type.</typeparam>
         /// <param name="value">The right value.</param>
         public static Either<TLeft, TRight> Right<TLeft, TRight>(TRight value) => new Right<TLeft, TRight>(value);
+
         /// <summary>
         /// Evaluates an enumerator of either monads and returns the
         /// right values of those in a right state.
@@ -307,6 +375,7 @@ namespace Interlook.Monads
 
             return Bind(either, aValue => Bind(func(aValue), funcValue => Right<TLeft, TResult>(select(aValue, funcValue))));
         }
+
         /// <summary>
         /// Creates a new <see cref="Left{TLeft, TRight}"/> instance
         /// </summary>
@@ -347,6 +416,16 @@ namespace Interlook.Monads
         /// <param name="value">The right value.</param>
         public static Either<Exception, TRight> ToExceptionEither<TRight>(this TRight value)
             => new Right<Exception, TRight>(value);
+
+        /// <summary>
+        /// Creates a new <see cref="Left{Exception, TRight}" /> instance
+        /// </summary>
+        /// <typeparam name="TRight">The right type.</typeparam>
+        /// <param name="ex">The exception to be contained in an left state "exception either"<see cref="Left"/></param>
+        /// <returns>A <see cref="Left{Exception, TRight}"/> instance containing the given exception.</returns>
+        public static Either<Exception, TRight> ToExceptionEitherLeft<TRight>(this Exception ex)
+            => new Left<Exception, TRight>(ex);
+
         /// <summary>
         /// Creates a new <see cref="Right{String, TRight}"/> instance
         /// </summary>
@@ -382,7 +461,7 @@ namespace Interlook.Monads
         /// <summary>
         /// Enforces the right value to be of a certain subtype of <typeparamref name="TRight"/>
         /// </summary>
-        /// <typeparam name="TSubtype">Datatype, being a subtype of <typeparamref name="TRight"/>, 
+        /// <typeparam name="TSubtype">Datatype, being a subtype of <typeparamref name="TRight"/>,
         /// that the right value of a <see cref="Right{TLeft, TRight}"/> instance is excpected to be.</typeparam>
         /// <param name="leftValue">Value, that will be used for a <see cref="Left{TLeft, TSubtype}"/> instance,
         /// if the typecheck fails.</param>
@@ -392,12 +471,13 @@ namespace Interlook.Monads
         /// <summary>
         /// Enforces the right value to be of a certain subtype of <typeparamref name="TRight"/>
         /// </summary>
-        /// <typeparam name="TSubtype">Datatype, being a subtype of <typeparamref name="TRight"/>, 
+        /// <typeparam name="TSubtype">Datatype, being a subtype of <typeparamref name="TRight"/>,
         /// that the right value of a <see cref="Right{TLeft, TRight}"/> instance is excpected to be.</typeparam>
-        /// <param name="leftValueFactory">Function creating a value, that will be used to create a 
+        /// <param name="leftValueFactory">Function creating a value, that will be used to create a
         /// <see cref="Left{TLeft, TSubtype}"/> instance, if the typecheck fails.</param>
         /// <returns></returns>
         public abstract Either<TLeft, TSubtype> FailIfNotSubtype<TSubtype>(Func<TRight, TLeft> leftValueFactory);
+
         /// <summary>
         /// Gets the left value.
         /// </summary>
@@ -410,6 +490,13 @@ namespace Interlook.Monads
         }
 
         /// <summary>
+        /// Gets the left value or a default value,
+        /// if the object is not <see cref="Left{TLeft, TRight}" /></summary>
+        /// <param name="defaultValue">The default value to return, if the object is in right state.</param>
+        /// <returns></returns>
+        public TLeft GetLeft(TLeft defaultValue) => !IsLeft ? defaultValue : GetLeftInternal();
+
+        /// <summary>
         /// Gets the right value.
         /// </summary>
         /// <returns></returns>
@@ -419,6 +506,13 @@ namespace Interlook.Monads
             if (IsLeft) throw new InvalidOperationException("GetRight() can only be invoked in 'right' state.");
             return GetRightInternal();
         }
+
+        /// <summary>
+        /// Gets the right value or a default value,
+        /// if the object is not <see cref="Right{TLeft, TRight}" /></summary>
+        /// <param name="defaultValue">The default value to return, if the object is in left state.</param>
+        /// <returns></returns>
+        public TRight GetRight(TRight defaultValue) => IsLeft ? defaultValue : GetRightInternal();
 
         /// <summary>
         /// Binds a function, in overriding classes.

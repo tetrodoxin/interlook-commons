@@ -1,11 +1,37 @@
-﻿using System;
+﻿#region license
+
+//MIT License
+
+//Copyright(c) 2013-2020 Andreas Hübner
+
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
+#endregion 
+using Interlook.Monads;
+using System;
 
 namespace Interlook.Functional.Types
 {
     /// <summary>
     /// A singleton object for empty strings in functional world.
     /// </summary>
-    public sealed class EmptyString : StringBase
+    public sealed class EmptyString : AnyString
     {
         private static readonly Lazy<EmptyString> _instance = new Lazy<EmptyString>(() => new EmptyString());
 
@@ -20,9 +46,11 @@ namespace Interlook.Functional.Types
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-        public override bool Equals(object other) => other is EmptyString || (other is string str && str.Length == 0);
+        public override bool Equals(object? other) => other switch { EmptyString _ => true, string str => Equals(str), _ => false };
 
-        public override bool Equals(StringBase other, StringComparison comparisonType) => other is EmptyString;
+        public override bool Equals(string other) => other != null && other.Length == 0;
+
+        public override bool Equals(AnyString other, StringComparison comparisonType) => other is EmptyString;
 
         public override int GetHashCode() => 0;
 
@@ -102,5 +130,19 @@ namespace Interlook.Functional.Types
         /// <c>true</c> if the value in <paramref name="value" /> is empty; otherwise, <c>false</c>.
         /// </returns>
         public override bool StartsWith(string value, StringComparison comparisonType) => string.IsNullOrEmpty(value);
+
+        /// <summary>
+        /// Concatenates a <see cref="char"/> object to this <see cref="EmptyString"/> instance.
+        /// </summary>
+        /// <param name="c">The character to append.</param>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Parameter necessary for extension method syntax")]
+        public NonEmptyString Append(char c)
+        {
+            string value = c.ToString();
+            return CanCreateWhiteSpaceStringFrom(value).IsNothing()
+                ? (NonEmptyString)new WhitespaceString(value)
+                : new SomeString(value);
+        }
     }
 }

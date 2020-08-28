@@ -23,29 +23,20 @@
 //SOFTWARE.
 
 #endregion 
-using System.Collections.Generic;
+using Interlook.Text;
+using System;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Interlook.Functional.Types.UnitTests")]
 
 namespace Interlook.Functional.Types
 {
     /// <summary>
-    /// Interface for results of <see cref="ProcessHelper"/>
+    /// Abstract base type for path statements
     /// </summary>
-    public interface IProcessResult
+    public abstract class AnyPath
     {
-        /// <summary>
-        /// Returns a sequence of error strings.
-        /// </summary>
-        IReadOnlyCollection<string> Errors { get; }
-
-        /// <summary>
-        /// Returns a sequence of standard-output string.
-        /// </summary>
-        IReadOnlyCollection<string> Output { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref="IProcessResult"/> represents
-        /// a successful process execution.
-        /// </summary>
-        bool Success { get; }
+        internal AnyPath()
+        { }
     }
 }

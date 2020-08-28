@@ -11,30 +11,30 @@ namespace Interlook.Functional.Types.UnitTests
     {
         private const string DirName = @"c:\correct\dir\path";
         private const string FileName = @"fileName.txt";
-        private static SomeString DirSomeString = StringBase.CreateSome(DirName).GetRight();
-        private static SomeString FileSomeString = StringBase.CreateSome(FileName).GetRight();
+        private static SomeString DirSomeString = SomeString.Create(DirName).GetRight();
+        private static SomeString FileSomeString = SomeString.Create(FileName).GetRight();
 
         [Fact]
         public void Directory_Property()
         {
-            var fullPathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat(FileSomeString);
-            var resultPath = AbsolutePath.ReturnFilePath(fullPathSomeString).GetRight();
+            var fullPathSomeString = DirSomeString.Append(Path.DirectorySeparatorChar).Concat(FileSomeString);
+            var resultPath = AbsoluteFilePath.Return(fullPathSomeString).GetRight();
 
             resultPath.Should().BeOfType<AbsoluteFilePath>();
-
-            resultPath.Directory.TrimmedPathInternal.Value.Should().Be(DirName);
+            var expectedDirName = DirSomeString.Append(Path.DirectorySeparatorChar);
+            resultPath.Directory.Path.Value.Should().Be(expectedDirName);
         }
 
         [Fact]
         public void ReturnFilePath_FromSomeString()
         {
-            var fullPathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat(FileSomeString);
-            var resultPath = AbsolutePath.ReturnFilePath(fullPathSomeString).GetRight();
+            var fullPathSomeString = DirSomeString.Append(Path.DirectorySeparatorChar).Concat(FileSomeString);
+            var resultPath = AbsoluteFilePath.Return(fullPathSomeString).GetRight();
 
             resultPath.Should().BeOfType<AbsoluteFilePath>();
 
             var expectedFullPathString = $"{DirName}{Path.DirectorySeparatorChar}{FileName}";
-            resultPath.Path.Value.Should().Be(expectedFullPathString);
+            resultPath.FullPath.Value.Should().Be(expectedFullPathString);
         }
 
         [Fact]
@@ -50,8 +50,8 @@ namespace Interlook.Functional.Types.UnitTests
         [Fact]
         public void Name_Property()
         {
-            SomeString pathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat(FileSomeString);
-            var path = AbsolutePath.ReturnDirectoryPath(pathSomeString).GetRight();
+            SomeString pathSomeString = DirSomeString.Append(Path.DirectorySeparatorChar).Concat(FileSomeString);
+            var path = AbsoluteDirectoryPath.Return(pathSomeString).GetRight();
 
             var actual = path.Name;
 
@@ -63,13 +63,13 @@ namespace Interlook.Functional.Types.UnitTests
         [Fact]
         public void ReturnFilePath_FromSomeStringWithDirSeparatorTail_Negative()
         {
-            var fullPathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat(FileSomeString).Concat(Path.DirectorySeparatorChar);
-            var result = AbsolutePath.ReturnFilePath(fullPathSomeString);
+            var fullPathSomeString = DirSomeString.Append(Path.DirectorySeparatorChar).Concat(FileSomeString).Append(Path.DirectorySeparatorChar);
+            var result = AbsoluteFilePath.Return(fullPathSomeString);
 
             result.Should().BeOfType<Left<Exception, AbsoluteFilePath>>($"Creating an instance of {nameof(AbsoluteFilePath)} with a path ending with the directory separator MUST fail.");
 
-            fullPathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat(FileSomeString).Concat(Path.AltDirectorySeparatorChar);
-            result = AbsolutePath.ReturnFilePath(fullPathSomeString);
+            fullPathSomeString = DirSomeString.Append(Path.DirectorySeparatorChar).Concat(FileSomeString).Append(Path.AltDirectorySeparatorChar);
+            result = AbsoluteFilePath.Return(fullPathSomeString);
 
             result.Should().BeOfType<Left<Exception, AbsoluteFilePath>>($"Creating an instance of {nameof(AbsoluteFilePath)} with a path ending with the alternative directory separator MUST fail.");
         }
@@ -87,32 +87,32 @@ namespace Interlook.Functional.Types.UnitTests
         public void ReturnFilePath_FromStringInstance()
         {
             var fullPathString = $"{DirName}{Path.DirectorySeparatorChar}{FileName}";
-            var resultPath = AbsolutePath.ReturnFilePath(fullPathString).GetRight();
+            var resultPath = AbsoluteFilePath.Return(fullPathString).GetRight();
 
             resultPath.Should().BeOfType<AbsoluteFilePath>();
 
-            resultPath.Path.Value.Should().Be(fullPathString);
+            resultPath.FullPath.Value.Should().Be(fullPathString);
         }
 
         [Fact]
         public void ReturnFilePath_FromStringInstanceWithDirSeparatorTail_Negative()
         {
             var fullPathString = $"{DirName}{Path.DirectorySeparatorChar}{FileName}{Path.DirectorySeparatorChar}";
-            var result = AbsolutePath.ReturnFilePath(fullPathString);
+            var result = AbsoluteFilePath.Return(fullPathString);
 
             result.Should().BeOfType<Left<Exception, AbsoluteFilePath>>($"Creating an instance of {nameof(AbsoluteFilePath)} with a path ending with the directory separator MUST fail.");
 
             fullPathString = $"{DirName}{Path.DirectorySeparatorChar}{FileName}{Path.AltDirectorySeparatorChar}";
-            result = AbsolutePath.ReturnFilePath(fullPathString);
+            result = AbsoluteFilePath.Return(fullPathString);
 
             result.Should().BeOfType<Left<Exception, AbsoluteFilePath>>($"Creating an instance of {nameof(AbsoluteFilePath)} with a path ending with the alternative directory separator MUST fail.");
         }
 
         private static void testReturnFilePath_InvalidChar_FromSomeString(char testChar)
         {
-            var fullPathSomeString = DirSomeString.Concat(Path.DirectorySeparatorChar).Concat($"prefix{testChar}suffix.txt");
+            var fullPathSomeString = DirSomeString.Append(Path.DirectorySeparatorChar).Concat($"prefix{testChar}suffix.txt");
 
-            var result = AbsolutePath.ReturnFilePath(fullPathSomeString);
+            var result = AbsoluteFilePath.Return(fullPathSomeString);
 
             result.Should().BeOfType<Left<Exception, AbsoluteFilePath>>($"the string '{fullPathSomeString}' with invalid character {testChar} must not result in an instance of {nameof(AbsoluteFilePath)}.");
         }
@@ -121,7 +121,7 @@ namespace Interlook.Functional.Types.UnitTests
         {
             var fullPathSomeString = $"{DirName}{Path.DirectorySeparatorChar}prefix{testChar}suffix.txt";
 
-            var result = AbsolutePath.ReturnFilePath(fullPathSomeString);
+            var result = AbsoluteFilePath.Return(fullPathSomeString);
 
             result.Should().BeOfType<Left<Exception, AbsoluteFilePath>>($"the string '{fullPathSomeString}' with invalid character {testChar} must not result in an instance of {nameof(AbsoluteFilePath)}.");
         }

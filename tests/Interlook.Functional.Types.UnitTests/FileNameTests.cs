@@ -13,7 +13,7 @@ namespace Interlook.Functional.Types.UnitTests
 
         public FileNameTests()
         {
-            fileNameString = StringBase.CreateSome("AnOrdinaryFile.pdf").GetRight();
+            fileNameString = SomeString.Create("AnOrdinaryFile.pdf").GetRight();
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Interlook.Functional.Types.UnitTests
 
         private static void testCreate_WithInvalidCharacter_FromSomeString(char testedCharacter)
         {
-            SomeString nameSomeString = StringBase.CreateSome("prefix").GetRight().Concat(testedCharacter).Concat("suffix.txt");
+            SomeString nameSomeString = SomeString.Create("prefix").GetRight().Append(testedCharacter).Concat("suffix.txt");
             var either = FileName.Create(nameSomeString);
             either.Should().BeOfType<Left<Exception, FileName>>($"the string '{nameSomeString}' with invalid character {testedCharacter} must not result in a FileName instance.");
         }
