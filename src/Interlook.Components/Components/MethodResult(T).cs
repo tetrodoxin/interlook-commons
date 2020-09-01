@@ -153,7 +153,7 @@ namespace Interlook.Components
         /// <returns>A new instance of the closed generic result with specified exception.</returns>
         public static MethodResult<T> CreateFailed(Exception ex) 
             => ex != null
-                ? (MethodResult<T>)new MethodResult(default, MethodResult.CodeErrorDefault, ex.Message, ex)
+                ? (MethodResult<T>)new MethodResult<T>(default, MethodResult.CodeErrorDefault, ex.Message, ex)
                 : CreateFailed(MethodResult.CodeErrorDefault, string.Empty);
 
         /// <summary>
